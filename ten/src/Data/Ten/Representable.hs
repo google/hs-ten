@@ -14,12 +14,18 @@
 
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides an analog of @Representable@ over arity-1 type constructors.
 
@@ -28,16 +34,26 @@ module Data.Ten.Representable
          , imap10, ifoldMap10, ifoldl10, ifoldr10, itraverse10
          , rep10'
          , distributeRep10, collectRep10
+         , GTabulate10(..)
          ) where
 
+import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
 import Data.Kind (Type)
 import Data.Monoid (Dual(..), Endo(..))
-import GHC.Generics ((:.:)(..))
+import GHC.Generics
+         ( Generic1(..)
+         , (:.:)(..), (:*:)(..)
+         , M1(..), Rec1(..), U1(..)
+         )
 
-import Data.Ten.Applicative (Applicative10)
-import Data.Ten.Foldable (Foldable10, fold10)
-import Data.Ten.Traversable (Traversable10, fsequenceA10)
+import Data.Wrapped (Wrapped1(..))
+
+import Data.Ten.Ap (Ap10(..))
+import Data.Ten.Applicative (Applicative10(..))
+import Data.Ten.Field (Field10(..))
+import Data.Ten.Foldable (Foldable10(..), fold10)
+import Data.Ten.Traversable (Traversable10(..), fsequenceA10)
 
 (.:) :: (q -> r) -> (a -> b -> q) -> a -> b -> r
 (.:) = (.) . (.)
@@ -121,3 +137,52 @@ collectRep10
   :: (Representable10 f, Functor w)
   => (a -> f m) -> w a -> f (w :.: m)
 collectRep10 f wa = distributeRep10 (f <$> wa)
+
+class Applicative10 rec => GTabulate10 (rec :: (k -> Type) -> Type) where
+  gtabulate10 :: (forall a. Field10 rec a -> r a) -> rec r
+
+instance GTabulate10 (Ap10 a) where
+  gtabulate10 r = Ap10 $ r $ Field10 coerce
+  {-# INLINE gtabulate10 #-}
+
+instance GTabulate10 U1 where
+  gtabulate10 _ = U1
+  {-# INLINE gtabulate10 #-}
+
+instance Representable10 rec => GTabulate10 (Rec1 rec) where
+  gtabulate10 r = Rec1 $
+    tabulate10 (\i -> r (Field10 (\ (Rec1 f) -> index10 f i)))
+  {-# INLINE gtabulate10 #-}
+
+instance GTabulate10 rec => GTabulate10 (M1 k i rec) where
+  gtabulate10 r = M1 $ gtabulate10 (r . coerce)
+
+starFst :: (f :*: g) m -> f m
+starFst (f :*: _) = f
+
+starSnd :: (f :*: g) m -> g m
+starSnd (_ :*: g) = g
+
+instance (GTabulate10 f, GTabulate10 g)
+      => GTabulate10 (f :*: g) where
+  gtabulate10 r = ftab :*: gtab
+   where
+    ftab = gtabulate10 $ \ (Field10 g) -> r $ Field10 $ g . starFst
+    gtab = gtabulate10 $ \ (Field10 g) -> r $ Field10 $ g . starSnd
+  {-# INLINE gtabulate10 #-}
+
+{-
+instance (GTabulate00 f, GTabulate10 g) => GTabulate10 (f :.: g) where
+  gtabulate10 r = Comp1 $
+    gtabulate00 $ \ (Field00 g0) ->
+    gtabulate10 $ \ (Field10 g1) ->
+    r $ Field10 (g1 . g0 . unComp1)
+  {-# INLINE gtabulate10 #-}
+  -}
+
+instance (Generic1 rec, GTabulate10 (Rep1 rec))
+      => Representable10 (Wrapped1 Generic1 rec) where
+  type Rep10 (Wrapped1 Generic1 rec) = Field10 rec
+  index10 (Wrapped1 rec) (Field10 f) = f rec
+  tabulate10 f =
+    Wrapped1 $ to1 $ gtabulate10 $ \i -> f $ Field10 $ getField10 i . from1

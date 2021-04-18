@@ -21,7 +21,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Functor.Field (Field(..), GFieldPaths(..)) where
+module Data.Functor.Field (Field(..), GFieldPaths(..), GTabulate(..)) where
 
 import Data.Coerce (coerce)
 import Data.Proxy (Proxy(..))
@@ -38,14 +38,16 @@ import Data.Wrapped (Wrapped1(..))
 import Text.PrettyPrint.HughesPJ (text)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
 
-import Data.Ten.Internal (PathComponent(..), dropUnderscore, showsPath)
+import Data.Ten.Internal
+         ( PathComponent(..), dropUnderscore, showsPath, starFst, starSnd
+         )
 
 -- | A 'Rep' type in the form of a parametric accessor function.
 newtype Field f = Field { getField :: forall a. f a -> a }
 
 -- | Build a record where each field has a description of the field's location.
 --
--- This primarily powers the 'Show' and 'Pretty' instances of 'Field00'.
+-- This primarily powers the 'Show' and 'Pretty' instances of 'Field'.
 class FieldPaths f where
   fieldPaths :: f [PathComponent]
 
@@ -116,3 +118,50 @@ instance (GFieldPaths f, GFieldPaths g) => GFieldPaths (f :.: g) where
     gfieldPaths $ \inner ->
     r $ outer ++ inner
   {-# INLINE gfieldPaths #-}
+
+-- | The 'Generic1' implementation of 'tabulate' for 'Field'.
+class GTabulate rec where
+  gtabulate :: (Field rec -> r) -> rec r
+
+{-
+instance (Generic1 f, GTabulate (Rep1 f)) => GTabulate (G1 f) where
+  gtabulate r = G1 $ to1 $ gtabulate $ \ (Field g) -> r $
+    Field $ g . from1 . unG1
+  {-# INLINE gtabulate #-}
+-}
+
+instance GTabulate U1 where
+  gtabulate _ = U1
+  {-# INLINE gtabulate #-}
+
+instance GTabulate rec => GTabulate (Rec1 rec) where
+  gtabulate r = Rec1 $ gtabulate (coerce r)
+  {-# INLINE gtabulate #-}
+
+instance GTabulate rec => GTabulate (M1 k i rec) where
+  gtabulate r = M1 $ gtabulate (coerce r)
+  {-# INLINE gtabulate #-}
+
+instance GTabulate Par1 where
+  gtabulate r = Par1 $ r (Field coerce)
+  {-# INLINE gtabulate #-}
+
+instance (GTabulate f, GTabulate g) => GTabulate (f :*: g) where
+  gtabulate r = ftab :*: gtab
+   where
+    ftab = gtabulate $ \ (Field g) -> r $ Field $ g . starFst
+    gtab = gtabulate $ \ (Field g) -> r $ Field $ g . starSnd
+  {-# INLINE gtabulate #-}
+
+instance (GTabulate f, GTabulate g) => GTabulate (f :.: g) where
+  gtabulate r = Comp1 $
+    gtabulate $ \ (Field g0) ->
+    gtabulate $ \ (Field g1) ->
+    r (Field $ g1 . g0 . unComp1)
+  {-# INLINE gtabulate #-}
+
+{-
+instance KnownNat n => GTabulate (Vec n) where
+  gtabulate r = tabulate $ \i -> r $ Field (Vec.! i)
+  {-# INLINE gtabulate #-}
+  -}

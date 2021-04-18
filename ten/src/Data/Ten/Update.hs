@@ -36,6 +36,7 @@ import GHC.Generics
 import Data.Wrapped (Wrapped1(..))
 
 import Data.Ten.Ap (Ap10(..))
+import Data.Ten.Applicative (Applicative10(..))
 import Data.Ten.Field (Field10(..))
 import Data.Ten.Representable (Representable10(..), GTabulate10(..))
 
@@ -107,7 +108,9 @@ newtype FieldSetter10 rec a = FS10
 setters10 :: (Generic1 f, GUpdate10 (Rep1 f)) => f (FieldSetter10 f)
 setters10 = to1 $ gsetters10 (\overI -> FS10 $ \f -> to1 . overI f . from1)
 
-instance (Generic1 f, GTabulate10 (Rep1 f), GUpdate10 (Rep1 f))
+instance ( Generic1 f
+         , Applicative10 (Rep1 f), GTabulate10 (Rep1 f), GUpdate10 (Rep1 f)
+         )
       => Update10 (Wrapped1 Generic1 f) where
   over10 =
     \i f (Wrapped1 fm) -> Wrapped1 $ runFS10 (getField10 i setters) f fm

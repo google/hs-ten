@@ -49,10 +49,12 @@ import GHC.Generics
 
 import Data.Wrapped (Wrapped1(..))
 
+import Data.Functor.Field (Field(..), GTabulate(..))
 import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..))
 import Data.Ten.Field (Field10(..))
 import Data.Ten.Foldable (Foldable10(..), fold10)
+import Data.Ten.Internal (starFst, starSnd)
 import Data.Ten.Traversable (Traversable10(..), fsequenceA10)
 
 (.:) :: (q -> r) -> (a -> b -> q) -> a -> b -> r
@@ -138,7 +140,7 @@ collectRep10
   => (a -> f m) -> w a -> f (w :.: m)
 collectRep10 f wa = distributeRep10 (f <$> wa)
 
-class Applicative10 rec => GTabulate10 (rec :: (k -> Type) -> Type) where
+class GTabulate10 (rec :: (k -> Type) -> Type) where
   gtabulate10 :: (forall a. Field10 rec a -> r a) -> rec r
 
 instance GTabulate10 (Ap10 a) where
@@ -157,12 +159,6 @@ instance Representable10 rec => GTabulate10 (Rec1 rec) where
 instance GTabulate10 rec => GTabulate10 (M1 k i rec) where
   gtabulate10 r = M1 $ gtabulate10 (r . coerce)
 
-starFst :: (f :*: g) m -> f m
-starFst (f :*: _) = f
-
-starSnd :: (f :*: g) m -> g m
-starSnd (_ :*: g) = g
-
 instance (GTabulate10 f, GTabulate10 g)
       => GTabulate10 (f :*: g) where
   gtabulate10 r = ftab :*: gtab
@@ -171,16 +167,14 @@ instance (GTabulate10 f, GTabulate10 g)
     gtab = gtabulate10 $ \ (Field10 g) -> r $ Field10 $ g . starSnd
   {-# INLINE gtabulate10 #-}
 
-{-
-instance (GTabulate00 f, GTabulate10 g) => GTabulate10 (f :.: g) where
+instance (GTabulate f, GTabulate10 g) => GTabulate10 (f :.: g) where
   gtabulate10 r = Comp1 $
-    gtabulate00 $ \ (Field00 g0) ->
+    gtabulate $ \ (Field g0) ->
     gtabulate10 $ \ (Field10 g1) ->
     r $ Field10 (g1 . g0 . unComp1)
   {-# INLINE gtabulate10 #-}
-  -}
 
-instance (Generic1 rec, GTabulate10 (Rep1 rec))
+instance (Generic1 rec, Applicative10 (Rep1 rec), GTabulate10 (Rep1 rec))
       => Representable10 (Wrapped1 Generic1 rec) where
   type Rep10 (Wrapped1 Generic1 rec) = Field10 rec
   index10 (Wrapped1 rec) (Field10 f) = f rec

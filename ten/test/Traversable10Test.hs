@@ -32,7 +32,7 @@ import Data.Traversable10
          , Applicative10(..), Constrained10
          , Ap10(..), Pair10(..)
          )
-import Data.Vec (Vec, vec3)
+import Data.Vec.Short (Vec, vec3)
 import Data.Wrapped (Wrapped1(..))
 
 import Test.HUnit.Lang (assertEqual)

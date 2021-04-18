@@ -109,8 +109,6 @@ module Data.Traversable10
   , rep10, rep10'
   , distributeRep10, collectRep10
 
-    -- * GHC.Generics implementations
-
     -- * Standard 'Functor10's
     -- ** Over types
   , Ap10(..), ap10, Const10(..), Pair10(..), Maybe10(..), Either10(..)

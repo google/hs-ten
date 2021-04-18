@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b154766c1f8e90e6a65e121c55b83a8e366ad8f395905e073a44ba54459aa74f
+-- hash: 01f41fd71cdec7248f0fd2fbb6fca89e6f7fb491d926e8dfb8b790287ec57f0e
 
 name:           ten
 version:        0.1.0.0
@@ -72,15 +72,15 @@ test-suite Traversable10-test
     , base
     , constraints
     , data-default-class
-    , data-vec
     , deepseq
     , lens
     , portray >=0.1
     , portray-pretty >=0.1
     , pretty
+    , short-vec
+    , ten
     , test-framework
     , test-framework-hunit
     , transformers
-    , traversable10
     , wrapped
   default-language: Haskell2010

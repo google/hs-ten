@@ -39,7 +39,7 @@ import Control.Lens (Lens', Getting, lens, view)
 
 import Data.Ten.Applicative (Applicative10)
 import Data.Ten.Foldable (Foldable10, fold10)
-import Data.Ten.Traversable (Traversable10, sequenceA10)
+import Data.Ten.Traversable (Traversable10, fsequenceA10)
 
 (.:) :: (q -> r) -> (a -> b -> q) -> a -> b -> r
 (.:) = (.) . (.)
@@ -122,7 +122,7 @@ itraverse10
   :: (Applicative f, Traversable10 t, Representable10 t)
   => (forall a. Rep10 t a -> m a -> f (n a))
   -> t m -> f (t n)
-itraverse10 f fm = sequenceA10 $ imap10 (Comp1 .: f) fm
+itraverse10 f fm = fsequenceA10 $ imap10 (Comp1 .: f) fm
 
 -- | Analog of 'Data.Functor.Rep.distributeRep' for 'Representable10'.
 --

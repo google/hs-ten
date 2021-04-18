@@ -27,10 +27,11 @@
 
 module Data.Ten.Foldable
          ( Foldable10(..)
-         , fold10, foldr10, foldl10, traverse10_, sequenceA10_
+         , fold10, foldr10, foldl10, traverse10_, sequenceA10_, fsequenceA10_
          ) where
 
 import Data.Functor.Const (Const(..))
+import Data.Functor.Identity (Identity(..))
 import Data.Kind (Type)
 import Data.Monoid (Dual(..), Endo(..))
 import GHC.Generics
@@ -103,5 +104,12 @@ traverse10_ f = foldl10 (\a x -> a <* f x) (pure ())
 -- with some inner type constructor at each field.
 --
 -- See 'Data.Ten.Traversable.fsequenceA10_' for a version that keeps the result.
-sequenceA10_ :: (Applicative f, Foldable10 t) => t (f :.: g) -> f ()
-sequenceA10_ = traverse10_ unComp1
+fsequenceA10_ :: (Applicative m, Foldable10 f) => f (m :.: n) -> m ()
+fsequenceA10_ = traverse10_ unComp1
+
+-- | Sequence actions in a 'Foldable10' left-to-right, discarding the result.
+--
+-- This variant expects just the plain @m@ actions with no inner type
+-- constructor.
+sequenceA10_ :: (Applicative m, Foldable10 f) => f m -> m ()
+sequenceA10_ = traverse10_ (fmap Identity)

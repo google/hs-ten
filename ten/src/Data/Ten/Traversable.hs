@@ -23,10 +23,11 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Data.Ten.Traversable
-         ( Traversable10(..), traverse10, sequenceA10
+         ( Traversable10(..), traverse10, sequenceA10, fsequenceA10
          ) where
 
 import Data.Coerce (coerce)
+import Data.Functor.Identity (Identity(..))
 import Data.Kind (Type)
 import GHC.Generics
          ( Generic1(..)
@@ -124,7 +125,19 @@ instance (Traversable f, Traversable10 g) => Traversable10 (f :.: g) where
   mapTraverse10 r f (Comp1 x) = r . Comp1 <$> traverse (traverse10 f) x
 
 -- | 'sequenceA' for 'Traversable10'.
+--
+-- This variant expects just the plain @m@ actions at each field, and wraps the
+-- results in @Identity.
 sequenceA10
-  :: (Applicative f, Traversable10 t)
-  => t (f :.: g) -> f (t g)
-sequenceA10 = traverse10 coerce
+  :: (Applicative m, Traversable10 f)
+  => f m -> m (f Identity)
+sequenceA10 = traverse10 (fmap Identity)
+
+-- | 'sequenceA' for 'Traversable10'.
+--
+-- This variant expects the composition of the 'Applicative' being sequenced
+-- with some inner type constructor at each field.
+fsequenceA10
+  :: (Applicative m, Traversable10 f)
+  => f (m :.: n) -> m (f n)
+fsequenceA10 = traverse10 coerce

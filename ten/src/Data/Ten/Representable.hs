@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeOperators #-}
 
 module Data.Ten.Representable
-         ( Representable10(..), index10C, ix10
+         ( Representable10(..), ix10
          , imap10, ifoldMap10, ifoldl10, ifoldr10, itraverse10
          , rep10, rep10'
          , distributeRep10, collectRep10
@@ -22,7 +22,6 @@ import GHC.Generics ((:.:)(..))
 import Control.Lens (Lens', Getting, lens, view)
 
 import Data.Ten.Applicative (Applicative10)
-import Data.Ten.Constrained (Constrained10(..), withConstrained)
 import Data.Ten.Foldable (Foldable10, fold10)
 import Data.Ten.Traversable (Traversable10, sequenceA10)
 
@@ -53,12 +52,6 @@ rep10
   :: Representable10 f
   => Getting (Rep10 f a) (f (Rep10 f)) (Rep10 f a) -> Rep10 f a
 rep10 l = rep10' (view l)
-
-index10C
-  :: forall cxt f a r m
-   . (Representable10 f, Constrained10 cxt f)
-  => f m -> Rep10 f a -> (cxt a => m a -> r) -> r
-index10C fm k f = withConstrained @cxt f $ index10 (constrained10 @_ @cxt fm) k
 
 ix10 :: Representable10 f => Rep10 f a -> Lens' (f m) (m a)
 ix10 i = lens (`index10` i) (flip (update10 i))
@@ -118,4 +111,3 @@ collectRep10
   :: (Representable10 f, Functor w)
   => (a -> f m) -> w a -> f (w :.: m)
 collectRep10 f wa = distributeRep10 (f <$> wa)
-

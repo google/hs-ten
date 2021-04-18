@@ -26,7 +26,7 @@
 module Data.Ten.Applicative
          ( Applicative10(..), (<*!), (*>!)
          , liftA310
-         , Arr10(..)
+         , (:->:)(Arr10, runArr10)
          ) where
 
 import Control.Applicative (liftA2)
@@ -51,7 +51,7 @@ class Functor10 f => Applicative10 f where
   pure10 :: (forall a. m a) -> f m
 
   -- | ('<*>') for 'Applicative10': zip two @f@s with 'runArr10'.
-  (<*>!) :: f (Arr10 m n) -> f m -> f n
+  (<*>!) :: f (m :->: n) -> f m -> f n
   (<*>!) = liftA210 (\ (Arr10 f') x' -> f' x')
 
   -- | 'Control.Applicative.liftA2' for 'Applicative10': zip two @f@s with a
@@ -87,7 +87,7 @@ instance (Applicative f, Applicative10 g) => Applicative10 (f :.: g) where
 --
 -- This is used to represent the partially-applied functions in the left side
 -- of ('<*>!').
-newtype Arr10 m n a = Arr10 { runArr10 :: m a -> n a }
+newtype (m :->: n) a = Arr10 { runArr10 :: m a -> n a }
 
 -- | 'Control.Applicative.liftA3' for 'Applicative10'.
 liftA310

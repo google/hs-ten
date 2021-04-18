@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a3dbef59488981e095c70c9ad4b31f4a35d890300b9d4d282cf650f55c3ba489
+-- hash: 141aafd2ca981960f55b15e0a0126b1d291aa5ff4cbf0c6a4cb14efd01c64555
 
 name:           ten
 version:        0.1.0.0
@@ -41,6 +41,7 @@ source-repository head
 library
   exposed-modules:
       Data.Traversable10
+      Data.Ten.Applicative
       Data.Ten.Foldable
       Data.Ten.Functor
       Data.Ten.Traversable

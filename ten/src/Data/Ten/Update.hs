@@ -16,17 +16,18 @@
 
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Ten.Update (Update10(..), updateRep10, ixRep10) where
+module Data.Ten.Update (Update10(..), updateRep10, ixRep10, FieldSetter10(..)) where
 
-import Data.Coerce (coerce)
 import Data.Functor ((<&>))
 import Data.Kind (Type)
+import Data.Type.Equality ((:~:)(..))
 import GHC.Generics
          ( Generic1(..)
          , (:*:)(..), (:.:)(..)
@@ -35,7 +36,9 @@ import GHC.Generics
 
 import Data.Wrapped (Wrapped1(..))
 
-import Data.Functor.Update (GUpdate(..))
+import Data.Functor.Rep (Representable(..))
+
+import Data.Functor.Update (Update(..))
 import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..))
 import Data.Ten.Field (Field10(..))
@@ -77,6 +80,10 @@ class GUpdate10 (rec :: (k -> Type) -> Type) where
     :: (forall a. (forall m. (m a -> m a) -> rec m -> rec m) -> r a)
     -> rec r
 
+instance Update10 (Ap10 a) where
+  overRep10 Refl f (Ap10 x) = Ap10 (f x)
+  {-# INLINE overRep10 #-}
+
 instance GUpdate10 U1 where
   gsetters10 _ = U1
   {-# INLINE gsetters10 #-}
@@ -90,10 +97,6 @@ instance GUpdate10 rec => GUpdate10 (M1 k i rec) where
   gsetters10 r = M1 $ gsetters10 (\s -> r $ \f -> M1 . s f . unM1 )
   {-# INLINE gsetters10 #-}
 
-instance GUpdate10 (Ap10 a) where
-  gsetters10 r = Ap10 $ r coerce
-  {-# INLINE gsetters10 #-}
-
 instance (GUpdate10 f, GUpdate10 g) => GUpdate10 (f :*: g) where
   gsetters10 r = fs :*: gs
    where
@@ -101,11 +104,11 @@ instance (GUpdate10 f, GUpdate10 g) => GUpdate10 (f :*: g) where
     gs = gsetters10 $ \s -> r $ mapStarSnd . s
   {-# INLINE gsetters10 #-}
 
-instance (GUpdate f, GUpdate10 g) => GUpdate10 (f :.: g) where
+instance (Update f, GUpdate10 g) => GUpdate10 (f :.: g) where
   gsetters10 r = Comp1 $
-    gsetters $ \ s0 ->
-    gsetters10 $ \ s1 ->
-    r $ \f -> Comp1 . s0 (s1 f) . unComp1
+    tabulate $ \ i ->
+    gsetters10 $ \ s ->
+    r $ \f -> Comp1 . overRep i (s f) . unComp1
   {-# INLINE gsetters10 #-}
 
 newtype FieldSetter10 rec a = FS10

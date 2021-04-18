@@ -13,12 +13,16 @@
 -- limitations under the License.
 
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Main where
 
@@ -27,28 +31,37 @@ import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
 import Data.Monoid (Sum(..))
 
+import Data.Distributive (Distributive(..))
+import Data.Functor.Field (FieldRep(..))
+import Data.Functor.Update (Update)
+import Data.Functor.Rep (Representable(..), distributeRep)
 import Data.Ten
          ( Functor10(..), Foldable10(..), Traversable10
-         , Applicative10(..), Constrained10
+         , Applicative10(..), Constrained10, Representable10, Update10
          , Ap10(..), Pair10(..)
          )
-import Data.Vec.Short (Vec, vec3)
 import Data.Wrapped (Wrapped1(..))
 
 import Test.HUnit.Lang (assertEqual)
 import Test.Framework (defaultMain)
 import Test.Framework.Providers.HUnit (testCase)
 
+data Pair a = Pair a a
+  deriving stock (Functor, Foldable, Traversable, Show, Eq, Generic, Generic1)
+  deriving (Representable, Update, Applicative, Monad) via FieldRep Pair
+
+instance Distributive Pair where distribute = distributeRep
+
 data Foo f = Foo
   { x :: Ap10 Word f
   , y :: Ap10 Char f
   , z :: Pair10 Bool Double f
-  , w :: Vec 3 (Ap10 Int f)
+  , w :: Pair (Ap10 Int f)
   }
   deriving (Generic, Generic1)
   deriving
     ( Foldable10, Traversable10, Constrained10 c
-    , Functor10, Applicative10
+    , Functor10, Applicative10, Representable10, Update10
     ) via Wrapped1 Generic1 Foo
 
 deriving instance Show (Foo Maybe)
@@ -65,7 +78,7 @@ data Bar f = Bar
   deriving (Generic, Generic1)
   deriving
     ( Foldable10, Traversable10, Constrained10 c
-    , Functor10, Applicative10
+    , Functor10, Applicative10, Representable10, Update10
     ) via Wrapped1 Generic1 Bar
 
 justAll :: BasicFoo -> MaybeFoo
@@ -90,7 +103,7 @@ theMask = Foo {
   x = cFalse,
   y = cTrue,
   z = Pair10 (Const True) (Const False),
-  w = vec3 cTrue cTrue cFalse
+  w = Pair cTrue cFalse
  }
 
 fNothing :: Ap10 a Maybe
@@ -104,7 +117,7 @@ masked = Foo {
   x = fNothing,
   y = fJust 'y',
   z = Pair10 (Just False) Nothing,
-  w = vec3 (fJust 2) (fJust 3) fNothing
+  w = Pair (fJust 6) fNothing
  }
 
 val :: a -> Ap10 a Identity
@@ -115,14 +128,14 @@ basic = Foo {
   x = val 123,
   y = val 'y',
   z = Pair10 (Identity False) (Identity 456.0),
-  w = vec3 (val 2) (val 3) (val 4)
+  w = Pair (val 6) (val 7)
  }
 
 {- HLINT ignore main "Use list literal" -}
 main :: IO ()
 main = defaultMain $
   testCase "popcntMask" (
-    assertEqual "" 4 (popcntMask theMask)
+    assertEqual "" 3 (popcntMask theMask)
   ) :
   testCase "applyMask" (
     assertEqual "" masked (applyMask theMask basic)) :

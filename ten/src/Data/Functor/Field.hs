@@ -25,7 +25,7 @@
 
 module Data.Functor.Field
          ( Field(..)
-         , GenericRepresentable(..), GFieldPaths(..), GTabulate(..)
+         , FieldRep(..), GFieldPaths(..), GTabulate(..)
          ) where
 
 import Data.Coerce (coerce)
@@ -130,21 +130,29 @@ instance (GFieldPaths f, GFieldPaths g) => GFieldPaths (f :.: g) where
 class GTabulate rec where
   gtabulate :: (Field rec -> r) -> rec r
 
-newtype GenericRepresentable f a = GenericRepresentable (f a)
+newtype FieldRep f a = FieldRep (f a)
   deriving Functor
 
 -- Only to satisfy the superclass constraint of Representable.
 instance (Generic1 f, GTabulate (Rep1 f), Functor f)
-      => Distributive (GenericRepresentable f) where
+      => Distributive (FieldRep f) where
   distribute = distributeRep
   collect = collectRep
 
 instance (Generic1 f, GTabulate (Rep1 f), Functor f)
-      => Representable (GenericRepresentable f) where
-  type Rep (GenericRepresentable f) = Field f
-  index (GenericRepresentable f) (Field g) = g f
-  tabulate f =
-    GenericRepresentable $ to1 $ gtabulate $ \i -> f $ Field $ getField i . from1
+      => Applicative (FieldRep f) where
+  pure x = tabulate (const x)
+  f <*> x = tabulate (index f <*> index x)
+
+instance (Generic1 f, GTabulate (Rep1 f), Functor f)
+      => Monad (FieldRep f) where
+  x >>= f = tabulate (index x >>= index . f)
+
+instance (Generic1 f, GTabulate (Rep1 f), Functor f)
+      => Representable (FieldRep f) where
+  type Rep (FieldRep f) = Field f
+  index (FieldRep f) (Field g) = g f
+  tabulate f = FieldRep $ to1 $ gtabulate $ \i -> f $ Field $ getField i . from1
 
 instance GTabulate U1 where
   gtabulate _ = U1

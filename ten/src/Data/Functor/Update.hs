@@ -33,7 +33,7 @@ import GHC.Generics
 
 import Data.Functor.Rep (Representable(..))
 
-import Data.Functor.Field (Field(..), GTabulate(..), GenericRepresentable(..))
+import Data.Functor.Field (Field(..), GTabulate(..), FieldRep(..))
 import Data.Ten.Internal (mapStarFst, mapStarSnd)
 
 class Representable f => Update f where
@@ -52,10 +52,9 @@ ixRep :: (Update f, Functor m) => Rep f -> (a -> m a) -> f a -> m (f a)
 ixRep i f = \fa -> f (index fa i) <&> \ma -> updateRep i ma fa
 
 instance (Generic1 f, GTabulate (Rep1 f), GUpdate (Rep1 f), Functor f)
-      => Update (GenericRepresentable f) where
+      => Update (FieldRep f) where
   overRep =
-    \i f (GenericRepresentable fa) ->
-      GenericRepresentable $ runFS (getField i setters_) f fa
+    \i f (FieldRep fa) -> FieldRep $ runFS (getField i setters_) f fa
    where
     setters_ :: f (FieldSetter f)
     setters_ = setters

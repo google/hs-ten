@@ -44,7 +44,7 @@ extra-source-files:
 ghc-options: -Wall -Werror
 
 dependencies:
-  - adjunctions # only for Data.Functor.Update
+  - adjunctions
   - distributive # only for Data.Functor.Update
   - base
   - constraints
@@ -79,7 +79,6 @@ tests:
     source-dirs: test
     dependencies:
       - HUnit
-      - short-vec
       - ten
       - test-framework
       - test-framework-hunit

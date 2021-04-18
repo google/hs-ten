@@ -180,6 +180,20 @@ instance Applicative10 (Pair10 a b) where
 instance (cxt a, cxt b) => Constrained10 cxt (Pair10 a b) where
   constrained10 (Pair10 x y) = Pair10 (Constrained x) (Constrained y)
 
+instance Representable10 (Pair10 a b) where
+  type Rep10 (Pair10 a b) = Field10 (Pair10 a b)
+  index10 x (Field10 f) = f x
+  tabulate10 f = Pair10
+    (f $ Field10 $ \ (Pair10 x _) -> x)
+    (f $ Field10 $ \ (Pair10 _ y) -> y)
+
+instance Update10 (Pair10 a b) where
+  overRep10 (Field10 f) = runFS10 $ f setters
+   where
+    setters = Pair10
+      (FS10 $ \g (Pair10 x y) -> Pair10 (g x) y)
+      (FS10 $ \g (Pair10 x y) -> Pair10 x (g y))
+
 -- | A 'Functor10' made by applying the argument to a fixed type, optionally.
 data Maybe10 (a :: k) (f :: k -> Type) = Nothing10 | Just10 (f a)
   deriving Generic

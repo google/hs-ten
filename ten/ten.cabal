@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 541aa2b147fbf47093152bee113cede15f1504ef00d7c44fde8bd9c41b774cd6
+-- hash: 343ee636cd952687e9326edee9cdbd171e0f5e183a960b56b19ab47a4e2e9ba4
 
 name:           ten
 version:        0.1.0.0
@@ -91,7 +91,6 @@ test-suite Traversable10-test
     , portray >=0.1
     , portray-pretty >=0.1
     , pretty
-    , short-vec
     , ten
     , test-framework
     , test-framework-hunit

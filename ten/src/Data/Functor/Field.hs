@@ -15,13 +15,18 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Functor.Field (Field(..), GFieldPaths(..), GTabulate(..)) where
+module Data.Functor.Field
+         ( Field(..)
+         , GenericRepresentable(..), GFieldPaths(..), GTabulate(..)
+         ) where
 
 import Data.Coerce (coerce)
 import Data.Proxy (Proxy(..))
@@ -34,6 +39,8 @@ import GHC.Generics
          )
 import GHC.TypeLits (KnownSymbol, symbolVal)
 
+import Data.Distributive (Distributive(..))
+import Data.Functor.Rep (Representable(..), distributeRep, collectRep)
 import Data.Wrapped (Wrapped1(..))
 import Text.PrettyPrint.HughesPJ (text)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
@@ -123,12 +130,21 @@ instance (GFieldPaths f, GFieldPaths g) => GFieldPaths (f :.: g) where
 class GTabulate rec where
   gtabulate :: (Field rec -> r) -> rec r
 
-{-
-instance (Generic1 f, GTabulate (Rep1 f)) => GTabulate (G1 f) where
-  gtabulate r = G1 $ to1 $ gtabulate $ \ (Field g) -> r $
-    Field $ g . from1 . unG1
-  {-# INLINE gtabulate #-}
--}
+newtype GenericRepresentable f a = GenericRepresentable (f a)
+  deriving Functor
+
+-- Only to satisfy the superclass constraint of Representable.
+instance (Generic1 f, GTabulate (Rep1 f), Functor f)
+      => Distributive (GenericRepresentable f) where
+  distribute = distributeRep
+  collect = collectRep
+
+instance (Generic1 f, GTabulate (Rep1 f), Functor f)
+      => Representable (GenericRepresentable f) where
+  type Rep (GenericRepresentable f) = Field f
+  index (GenericRepresentable f) (Field g) = g f
+  tabulate f =
+    GenericRepresentable $ to1 $ gtabulate $ \i -> f $ Field $ getField i . from1
 
 instance GTabulate U1 where
   gtabulate _ = U1

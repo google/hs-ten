@@ -55,3 +55,9 @@ starFst (f :*: _) = f
 
 starSnd :: (f :*: g) m -> g m
 starSnd (_ :*: g) = g
+
+mapStarFst :: (f m -> f m) -> (f :*: g) m -> (f :*: g) m
+mapStarFst h (f :*: g) = h f :*: g
+
+mapStarSnd :: (g m -> g m) -> (f :*: g) m -> (f :*: g) m
+mapStarSnd h (f :*: g) = f :*: h g

@@ -17,12 +17,12 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Data.Ten.Lens (rep10, ix10, ap10, comp) where
+module Data.Ten.Lens (rep10, ixRep10, ap10, comp) where
 
 import Control.Lens (Getting, Iso, iso, view)
 
 import Data.Ten.Representable (Representable10(..), rep10')
-import Data.Ten.Update (ix10)
+import Data.Ten.Update (ixRep10)
 import Data.Ten (Ap10(..), (:.:)(..))
 
 -- | Turn a record field lens into a 'Rep10'.

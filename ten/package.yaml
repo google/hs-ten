@@ -45,6 +45,7 @@ ghc-options: -Wall -Werror
 
 dependencies:
   - adjunctions # only for Data.Functor.Update
+  - distributive # only for Data.Functor.Update
   - base
   - constraints
   - data-default-class
@@ -59,6 +60,7 @@ library:
   source-dirs: src
   exposed-modules:
     - Data.Functor.Field
+    - Data.Functor.Update
     - Data.Ten
     - Data.Ten.Ap
     - Data.Ten.Applicative

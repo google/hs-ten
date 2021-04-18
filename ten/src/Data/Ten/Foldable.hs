@@ -42,6 +42,8 @@ import GHC.Generics
 
 import Data.Wrapped (Wrapped1(..))
 
+import Data.Ten.Ap (Ap10(..))
+
 -- | 'Foldable' over arity-1 type constructors.
 --
 -- Whereas 'Foldable' folds @a :: Type@ values to a monoid, 'Foldable10' folds
@@ -55,6 +57,9 @@ class Foldable10 (t :: (k -> Type) -> Type) where
 instance (Generic1 f, Foldable10 (Rep1 f))
       => Foldable10 (Wrapped1 Generic1 f) where
   foldMap10 f = foldMap10 f . from1 . unWrapped1
+
+instance Foldable10 (Ap10 a) where
+  foldMap10 f (Ap10 x) = f x
 
 instance Foldable10 (K1 i a) where
   foldMap10 _ (K1 _) = mempty

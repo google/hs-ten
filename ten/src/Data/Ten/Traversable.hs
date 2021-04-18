@@ -37,6 +37,7 @@ import GHC.Generics
 
 import Data.Wrapped (Wrapped1(..))
 
+import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Foldable (Foldable10)
 import Data.Ten.Functor (Functor10)
 
@@ -97,6 +98,9 @@ traverse10 = mapTraverse10 id
 instance (Generic1 f, Traversable10 (Rep1 f))
       => Traversable10 (Wrapped1 Generic1 f) where
   mapTraverse10 r f = mapTraverse10 (r . Wrapped1 . to1) f . from1 . unWrapped1
+
+instance Traversable10 (Ap10 a) where
+  mapTraverse10 r f (Ap10 x) = r . Ap10 <$> f x
 
 instance Traversable10 (K1 i a) where
   mapTraverse10 r _ k = pure (r $ coerce k)

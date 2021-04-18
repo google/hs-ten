@@ -101,24 +101,24 @@ module Data.Ten
   , module Data.Ten.Update
 
     -- * Standard 'Functor10's
+  , module Data.Ten.Ap
     -- ** Over types
-  , Ap10(..), Const10(..), Pair10(..), Maybe10(..), Either10(..)
+  , Const10(..), Pair10(..), Maybe10(..), Either10(..)
     -- ** Over type constructors
   , ConstF10(..), PairF10(..), EitherF10(..), Exists(..)
     -- ** Over 'Functor10's
   , (:.:)(..), ProductF10(..), SumF10(..)
   ) where
 
-import Control.DeepSeq (NFData)
 import Data.Kind (Type)
 import GHC.Generics
 
-import Data.Default.Class (Default)
 import Data.Portray (Portray(..), Portrayal(..))
 import Data.Portray.Pretty (WrappedPortray(..))
 import Data.Wrapped (Wrapped(..))
 import Text.PrettyPrint.HughesPJClass (Pretty)
 
+import Data.Ten.Ap
 import Data.Ten.Applicative
 import Data.Ten.Constrained
 import Data.Ten.Foldable
@@ -138,29 +138,6 @@ import Data.Ten.Update
 --
 -- class Contravariant10 f where
 --   contramap10 :: (forall a. n a -> m a) -> f m -> f n
-
--- | A 'Functor10' made by applying the argument to a fixed type.
-newtype Ap10 (a :: k) (f :: k -> Type) = Ap10 { unAp10 :: f a }
-  deriving stock (Eq, Ord, Show, Generic)
-  deriving newtype (Default, Pretty, Portray)
-
-instance (NFData a, NFData (f a)) => NFData (Ap10 a f)
-
-instance Functor10 (Ap10 a) where
-  fmap10 f (Ap10 x) = Ap10 (f x)
-
-instance Foldable10 (Ap10 a) where
-  foldMap10 f (Ap10 x) = f x
-
-instance Traversable10 (Ap10 a) where
-  mapTraverse10 r f (Ap10 x) = r . Ap10 <$> f x
-
-instance Applicative10 (Ap10 a) where
-  pure10 = Ap10
-  liftA210 f (Ap10 x) (Ap10 y) = Ap10 $ f x y
-
-instance cxt a => Constrained10 cxt (Ap10 a) where
-  constrained10 (Ap10 x) = Ap10 (Constrained x)
 
 -- | A 'Functor10' made by applying the argument to the first of two types.
 newtype Const10 (a :: k1) (b :: k2) (f :: k1 -> Type) = Const10 (f a)

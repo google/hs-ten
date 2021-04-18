@@ -38,6 +38,7 @@ import GHC.Generics
 
 import Data.Wrapped (Wrapped1(..))
 
+import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Functor (Functor10, (<$>!))
 
 infixl 4 <*>!
@@ -64,6 +65,10 @@ instance (Generic1 f, Applicative10 (Rep1 f))
   pure10 x = Wrapped1 $ to1 $ pure10 x
   liftA210 f (Wrapped1 x) (Wrapped1 y) =
     Wrapped1 $ to1 $ liftA210 f (from1 x) (from1 y)
+
+instance Applicative10 (Ap10 a) where
+  pure10 = Ap10
+  liftA210 f (Ap10 x) (Ap10 y) = Ap10 $ f x y
 
 -- no instance Applicative10 (K1 i a): K1 is extra non-wrapped data
 -- no instance Applicative10 V1: V1 is uninhabited

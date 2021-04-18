@@ -55,6 +55,7 @@ import Data.Portray.Pretty (WrappedPortray(..))
 import Data.Wrapped (Wrapped1(..))
 import Text.PrettyPrint.HughesPJClass (Pretty)
 
+import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..), liftA210, liftA310)
 import Data.Ten.Foldable (Foldable10, foldl10, foldr10, foldMap10, traverse10_)
 import Data.Ten.Functor (Functor10(..))
@@ -82,6 +83,9 @@ withConstrained f (Constrained x) = f x
 class Constrained10 (cxt :: k -> Constraint) (f :: (k -> Type) -> Type) where
   -- | Recover instances of @cxt@ to accompany each @m@ element in @f@.
   constrained10 :: f m -> f (Constrained cxt m)
+
+instance cxt a => Constrained10 cxt (Ap10 a) where
+  constrained10 (Ap10 x) = Ap10 (Constrained x)
 
 instance (Generic1 f, Constrained10 cxt (Rep1 f))
       => Constrained10 cxt (Wrapped1 Generic1 f) where

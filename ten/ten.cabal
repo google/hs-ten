@@ -41,6 +41,7 @@ source-repository head
 library
   exposed-modules:
       Data.Ten
+      Data.Ten.Ap
       Data.Ten.Applicative
       Data.Ten.Constrained
       Data.Ten.Foldable

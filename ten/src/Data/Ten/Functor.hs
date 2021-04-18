@@ -38,6 +38,8 @@ import GHC.Generics
 
 import Data.Wrapped (Wrapped1(..))
 
+import Data.Ten.Ap (Ap10(..))
+
 -- | 'Functor' over arity-1 type constructors.
 --
 -- Whereas 'Functor' maps @a :: Type@ values to @b :: Type@ values, 'Functor10'
@@ -51,6 +53,9 @@ class Functor10 (f :: (k -> Type) -> Type) where
 instance (Generic1 f, Functor10 (Rep1 f))
       => Functor10 (Wrapped1 Generic1 f) where
   fmap10 f = Wrapped1 . to1 . fmap10 f . from1 . unWrapped1
+
+instance Functor10 (Ap10 a) where
+  fmap10 f (Ap10 x) = Ap10 (f x)
 
 instance Functor10 (K1 i a) where
   fmap10 _ (K1 x) = K1 x

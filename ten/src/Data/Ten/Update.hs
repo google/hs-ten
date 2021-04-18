@@ -23,7 +23,10 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Ten.Update (Update10(..), updateRep10, ixRep10, FieldSetter10(..)) where
+module Data.Ten.Update
+         ( Update10(..), updateRep10, ixRep10, FieldSetter10(..)
+         , EqualityTable(..), equalityTable
+         ) where
 
 import Data.Functor ((<&>))
 import Data.Kind (Type)
@@ -62,6 +65,12 @@ ixRep10
   :: (Update10 f, Functor g)
   => Rep10 f a -> (m a -> g (m a)) -> f m -> g (f m)
 ixRep10 i f = \fm -> f (index10 fm i) <&> \fma -> updateRep10 i fma fm
+
+newtype EqualityTable f a = EqualityTable (f (Maybe :.: ((:~:) a)))
+
+equalityTable :: Update10 f => f (EqualityTable f)
+equalityTable = tabulate10 $ \i -> EqualityTable $
+  updateRep10 i (Comp1 (Just Refl)) (pure10 (Comp1 Nothing))
 
 instance ( Generic1 f
          , Applicative10 (Rep1 f), GTabulate10 (Rep1 f), GUpdate10 (Rep1 f)

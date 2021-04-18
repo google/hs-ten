@@ -45,12 +45,16 @@ import Data.Wrapped (Wrapped1(..))
 import Text.PrettyPrint.HughesPJ (text)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
 
+import {-# SOURCE #-} Data.Functor.Update (Update, equalityTable)
 import Data.Ten.Internal
          ( PathComponent(..), dropUnderscore, showsPath, starFst, starSnd
          )
 
 -- | A 'Rep' type in the form of a parametric accessor function.
 newtype Field f = Field { getField :: forall a. f a -> a }
+
+instance Update f => Eq (Field f) where
+  Field f == Field g = g (f equalityTable)
 
 -- | Build a record where each field has a description of the field's location.
 --

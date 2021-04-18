@@ -30,6 +30,7 @@ import Data.Functor.Const (Const(..))
 import Data.Kind (Type)
 import Data.Proxy (Proxy(..))
 import qualified Data.Text as T
+import Data.Type.Equality (TestEquality(..))
 import GHC.Generics
          ( Generic1(..)
          , (:*:)(..), (:.:)(..)
@@ -45,9 +46,14 @@ import Text.PrettyPrint.HughesPJClass (Pretty(..))
 import Data.Functor.Field (GFieldPaths(..))
 import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Internal (PathComponent(..), dropUnderscore, showsPath)
+import {-# SOURCE #-} Data.Ten.Update (Update10, EqualityTable(..), equalityTable)
 
 -- | A 'Rep10' type in the form of a parametric accessor function.
 newtype Field10 f a = Field10 { getField10 :: forall m. f m -> m a }
+
+instance Update10 f => TestEquality (Field10 f) where
+  testEquality (Field10 f) (Field10 g) = case f equalityTable of
+    EqualityTable tbl -> unComp1 (g tbl)
 
 instance FieldPaths10 rec => Show (Field10 rec a) where
   showsPrec p (Field10 f) = showParen (p > 10) $

@@ -21,7 +21,10 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Functor.Update (Update(..), updateRep, ixRep, GUpdate(..)) where
+module Data.Functor.Update
+         ( Update(..), updateRep, ixRep, GUpdate(..)
+         , equalityTable
+         ) where
 
 import Data.Coerce (coerce)
 import Data.Functor ((<&>))
@@ -58,6 +61,9 @@ instance (Generic1 f, GTabulate (Rep1 f), GUpdate (Rep1 f), Functor f)
    where
     setters_ :: f (FieldSetter f)
     setters_ = setters
+
+equalityTable :: Update f => f (f Bool)
+equalityTable = tabulate (\i -> updateRep i True (tabulate (const False)))
 
 -- | The 'Generic1' implementation of 'GUpdate'.
 --

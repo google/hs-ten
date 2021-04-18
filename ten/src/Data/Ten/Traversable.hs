@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Provides an analog of 'Traversable' over arity-1 type constructors.
+
 {-# LANGUAGE EmptyCase #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -22,7 +24,6 @@
 
 module Data.Ten.Traversable
          ( Traversable10(..), traverse10, sequenceA10
-         -- , Traversal10, LensLike10
          ) where
 
 import Data.Coerce (coerce)
@@ -38,19 +39,10 @@ import Data.Wrapped (Wrapped1(..))
 import Data.Ten.Foldable (Foldable10)
 import Data.Ten.Functor (Functor10)
 
--- TODO(awpr): What to do with these?
---
--- type LensLike10 f s t m n = (forall a. m a -> f (n a)) -> s -> f t
--- type Getter10 s m = forall f. (Functor f, Contravariant f) => LensLike10 f s s m m
--- type Fold10 s m = forall f. (Applicative f, Contravariant f) => LensLike10 f s s m m
--- type Setter10 s t m n = LensLike10 Identity s t m n
--- type Lens10 s t m n = forall f. Functor f => LensLike10 f s t m n
--- type Traversal10 s t m n = forall f. Applicative f => LensLike10 f s t m n
-
 (.:) :: (q -> r) -> (a -> b -> q) -> a -> b -> r
 (.:) = (.) . (.)
 
--- | Analog of 'Traversable' for @(k -> Type) -> Type@ functors.
+-- | Analog of 'Traversable' over arity-1 type constructors.
 --
 -- This is defined in terms of 'mapTraverse10' for two reasons:
 --
@@ -65,9 +57,11 @@ import Data.Ten.Functor (Functor10)
 --   crucially, the same trick applies when traversing multiple fields and
 --   combining them back into a product type: the first call can use
 --   'mapTraverse10' to pre-apply the function, and use '<*>' rather than
---   'liftA2' (which is often defined as an 'fmap' followed by a '<*>').
+--   'Control.Applicative.liftA2' (which is often defined as an 'fmap' followed
+--   by a '<*>').
 class (Functor10 t, Foldable10 t)
    => Traversable10 (t :: (k -> Type) -> Type) where
+  -- | 'traverse10' with a built-in 'fmap' on the final result.
   mapTraverse10
     :: forall f m n r
      . Applicative f
@@ -75,25 +69,23 @@ class (Functor10 t, Foldable10 t)
     -> (forall a. m a -> f (n a))
     -> t m -> f r
 
--- | Analog of 'traverse' for @(k -> Type) -> Type@ functors.
+-- | Analog of 'traverse' for functors over arity-1 type constructors.
 --
--- Given a function that takes the wrapped type @m a@ to @n a@ in an Applicative
--- @f@ for all @a@, visit all contained @m@s to convert from @t m@ to @t n@.
+-- Given a parametric function that takes the wrapped type @m a@ to @n a@ in an
+-- 'Applicative' @f@, visit all contained @m _@s to convert from @t m@ to @t n@.
 --
 -- @m@ and @n@ here play the role of @a@ and @b@ in the normal 'traverse' type;
 -- that is, instead of traversing to change a @Type@, we're traversing to change
--- a wrapper type constructor of kind @k -> Type@:
+-- a type constructor of kind @k -> Type@:
 --
+-- @
 --     traverse
 --       :: (Traversable t, Applicative f)
 --       => (          a   -> f  b   ) -> t a -> f (t b)
 --     traverse10
 --       :: (Traversable10 t, Applicative f)
---       => (forall a. m a -> f (n a)) -> t m -> f (t n)
---
--- An equivalent type signature is:
---
---     traverse10 :: Traversable10 t => Traversal10 (t m) (t n) m n
+--       => (forall x. m x -> f (n x)) -> t m -> f (t n)
+-- @
 traverse10
   :: forall t f m n
    . (Traversable10 t, Applicative f)
@@ -131,8 +123,8 @@ instance (Traversable10 f, Traversable10 g) => Traversable10 (f :*: g) where
 instance (Traversable f, Traversable10 g) => Traversable10 (f :.: g) where
   mapTraverse10 r f (Comp1 x) = r . Comp1 <$> traverse (traverse10 f) x
 
+-- | 'sequenceA' for 'Traversable10'.
 sequenceA10
   :: (Applicative f, Traversable10 t)
   => t (f :.: g) -> f (t g)
 sequenceA10 = traverse10 coerce
-

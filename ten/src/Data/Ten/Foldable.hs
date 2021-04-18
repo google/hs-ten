@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Provides an analog of 'Foldable' over arity-1 type constructors.
+
 {-# LANGUAGE EmptyCase #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -39,8 +41,14 @@ import GHC.Generics
 
 import Data.Wrapped (Wrapped1(..))
 
-
+-- | 'Foldable' over arity-1 type constructors.
+--
+-- Whereas 'Foldable' folds @a :: Type@ values to a monoid, 'Foldable10' folds
+-- @(m :: k -> Type) a@ values to a monoid, parametrically in @a@.  That is,
+-- the type parameter of 'Foldable' has arity 0, and the type parameter of
+-- 'Foldable10' has arity 1.
 class Foldable10 (t :: (k -> Type) -> Type) where
+  -- | Map each @m a@ element parametrically to @w@ and 'mconcat' the results.
   foldMap10 :: Monoid w => (forall a. m a -> w) -> t m -> w
 
 instance (Generic1 f, Foldable10 (Rep1 f))
@@ -69,19 +77,31 @@ instance (Foldable10 f, Foldable10 g) => Foldable10 (f :*: g) where
 instance (Foldable f, Foldable10 g) => Foldable10 (f :.: g) where
   foldMap10 f (Comp1 x) = foldMap (foldMap10 f) x
 
+-- | Given a structure over @'Constant' m@, return the ('<>') of all elements.
 fold10 :: (Foldable10 t, Monoid m) => t (Constant m) -> m
 fold10 = foldMap10 getConstant
 
+-- | Right-associative fold over a 'Foldable10'.
 foldr10 :: Foldable10 t => (forall a. m a -> b -> b) -> b -> t m -> b
 foldr10 f z = flip appEndo z . foldMap10 (Endo . f)
 
+-- | Left-associative fold over a 'Foldable10'.
 foldl10 :: Foldable10 t => (forall a. b -> m a -> b) -> b -> t m -> b
 foldl10 f z = flip appEndo z . getDual . foldMap10 (Dual . Endo . flip f)
 
+-- | Sequence actions given by a function left-to-right in a 'Foldable10'.
+--
+-- This form discards the final result; see 'Data.Ten.Traversable.traverse10'
+-- for a version that keeps it.
 traverse10_
   :: (Applicative f, Foldable10 t) => (forall a. m a -> f (n a)) -> t m -> f ()
 traverse10_ f = foldl10 (\a x -> a <* f x) (pure ())
 
+-- | Sequence actions in a 'Foldable10' left-to-right, discarding the result.
+--
+-- This variant expects the composition of the 'Applicative' being sequenced
+-- with some inner type constructor at each field.
+--
+-- See 'Data.Ten.Traversable.fsequenceA10_' for a version that keeps the result.
 sequenceA10_ :: (Applicative f, Foldable10 t) => t (f :.: g) -> f ()
 sequenceA10_ = traverse10_ unComp1
-

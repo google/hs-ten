@@ -21,6 +21,8 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
+-- | Provides an analog of @Representable@ over arity-1 type constructors.
+
 module Data.Ten.Representable
          ( Representable10(..), ix10
          , imap10, ifoldMap10, ifoldl10, ifoldr10, itraverse10
@@ -42,75 +44,87 @@ import Data.Ten.Traversable (Traversable10, sequenceA10)
 (.:) :: (q -> r) -> (a -> b -> q) -> a -> b -> r
 (.:) = (.) . (.)
 
--- | Analogous to 'Representable' for 'Functor10'.
+-- | Analog of 'Data.Functor.Rep.Representable' over arity-1 type constructors.
 --
 -- If @f@ is @Representable10@, then a value of type @f m@ is isomorphic to a
--- function @forall a. Rep10 a -> m a@.  This essentially means it can be
+-- function @forall a. Rep10 f a -> m a@.  This essentially means it can be
 -- thought of as a fixed-shape record with a wrapper type applied to all of its
 -- fields.
 --
--- This is also equivalent to a total dependent map (see the dependent-map
--- package) from @Rep10 f@ to @m@ ("total" meaning that every "key" has a
--- "value").
+-- This is also equivalent to a total dependent map from @Rep10 f@ to @m@
+-- ("total" meaning that every "key" has a "value").
 class Applicative10 f => Representable10 (f :: (k -> Type) -> Type) where
+  -- | The "index" type of an @f@ "container".
+  --
+  -- This is a type that behaves like a GADT, with a value for each possible
+  -- "position" of an @m a@ in @f m@ and the parameter type(s) @a@ it can have.
   type Rep10 f :: k -> Type
+
+  -- | Given an @f m@ and a @Rep10 f a@ "index" into it, extract the @m a@.
   index10 :: f m -> Rep10 f a -> m a
+
+  -- | Build an @f m@ by applying a parametric function to each "index".
   tabulate10 :: (forall a. Rep10 f a -> m a) -> f m
 
+  -- | Update an @f m@ at a given index.
   update10 :: Rep10 f a -> m a -> f m -> f m
 
+-- | Turn a record field selector into a 'Rep10'.
+--
+-- See also 'rep10'.
 rep10' :: Representable10 f => (f (Rep10 f) -> Rep10 f a) -> Rep10 f a
 rep10' = ($ tabulate10 id)
 
+-- | Turn a record field lens into a 'Rep10'.
+--
+-- Since 'tabulate10' can give us a record of 'Rep10's, all we have to do to
+-- convert a lens into a 'Rep10' is use 'view' to extract the desired 'Rep10'.
 rep10
   :: Representable10 f
   => Getting (Rep10 f a) (f (Rep10 f)) (Rep10 f a) -> Rep10 f a
 rep10 l = rep10' (view l)
 
+-- | A 'Control.Lens.Lens' to the field identified by a given 'Rep10'.
 ix10 :: Representable10 f => Rep10 f a -> Lens' (f m) (m a)
 ix10 i = lens (`index10` i) (flip (update10 i))
 
--- | 'fmap10' with an index parameter.
+-- | 'Data.Ten.Functor10.fmap10' with an index parameter.
 --
 -- The additional 'Rep10' parameter is a GADT-like type that identifies the
--- current field within @f@ and its type.  Frequently this will be
--- @'Field10' f@, but it may also be an actual hand-coded GADT.
+-- current field within @f@ and its type.  Frequently this will be @Field10 f@,
+-- but it may also be an actual hand-coded GADT.
 imap10
   :: Representable10 f
   => (forall a. Rep10 f a -> m a -> n a) -> f m -> f n
 imap10 f fm = tabulate10 (\i -> f i (fm `index10` i))
 
--- | 'foldMap10' with an index parameter.
---
--- See 'fmap10'.
+-- | 'Data.Ten.Foldable.foldMap10' with an index parameter.
 ifoldMap10
   :: (Monoid w, Foldable10 f, Representable10 f)
   => (forall a. Rep10 f a -> m a -> w) -> f m -> w
 ifoldMap10 f fm = fold10 $ imap10 (Constant .: f) fm
 
--- | 'foldl10' with an index parameter.
+-- | 'Data.Ten.Foldable.foldl10' with an index parameter.
 ifoldl10
   :: (Foldable10 f, Representable10 f)
   => (forall a. Rep10 f a -> b -> m a -> b) -> b -> f m -> b
 ifoldl10 f z fm = appEndo (ifoldMap10 (\i x -> Endo (\b -> f i b x)) fm) z
 
--- | 'foldr10' with an index parameter.
+-- | 'Data.Ten.Foldable.foldr10' with an index parameter.
 ifoldr10
   :: (Foldable10 f, Representable10 f)
   => (forall a. Rep10 f a -> m a -> b -> b) -> b -> f m -> b
 ifoldr10 f z fm = flip appEndo z $ getDual $
   ifoldMap10 (\i x -> Dual $ Endo (f i x)) fm
 
--- | 'traverse10' with an index parameter.
---
--- See 'fmap10'.
+-- | 'Data.Ten.Traversable.traverse10' with an index parameter.
 itraverse10
   :: (Applicative f, Traversable10 t, Representable10 t)
   => (forall a. Rep10 t a -> m a -> f (n a))
   -> t m -> f (t n)
 itraverse10 f fm = sequenceA10 $ imap10 (Comp1 .: f) fm
 
--- | Analog of 'distributeRep' for 'Representable10'.
+-- | Analog of 'Data.Functor.Rep.distributeRep' for 'Representable10'.
 --
 -- Pulls a fixed record shape to the outside of any functor.
 distributeRep10
@@ -118,7 +132,7 @@ distributeRep10
   => w (f m) -> f (w :.: m)
 distributeRep10 wfm = tabulate10 (\r -> Comp1 $ (`index10` r) <$> wfm)
 
--- | Analog of 'collectRep' for 'Representable10'.
+-- | Analog of 'Data.Functor.Rep.collectRep' for 'Representable10'.
 --
 -- Gathers a fixed record shape mapped over the elements of any functor.
 collectRep10

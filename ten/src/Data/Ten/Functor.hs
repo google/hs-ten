@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Provides an analog of 'Functor' over arity-1 type constructors.
+
 {-# LANGUAGE EmptyCase #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -36,8 +38,14 @@ import GHC.Generics
 
 import Data.Wrapped (Wrapped1(..))
 
--- | A functor from the category @* -> Type@ to the category @*@.
+-- | 'Functor' over arity-1 type constructors.
+--
+-- Whereas 'Functor' maps @a :: Type@ values to @b :: Type@ values, 'Functor10'
+-- maps @(m :: k -> Type) a@ values to @m b@ values, parametrically in @a@.
+-- That is, the type parameter of 'Functor' has arity 0, and the type
+-- parameter of 'Functor10' has arity 1.
 class Functor10 (f :: (k -> Type) -> Type) where
+  -- | Map each @m a@ value in @f m@ parametrically to @n a@ to get @f m@.
   fmap10 :: (forall a. m a -> n a) -> f m -> f n
 
 instance (Generic1 f, Functor10 (Rep1 f))
@@ -76,7 +84,7 @@ infixl 4 <$>!
 (<$>!) :: Functor10 f => (forall a. m a -> n a) -> f m -> f n
 (<$>!) = fmap10
 
--- | 'void' for 'Functor10'.
+-- | 'Data.Functor.void' for 'Functor10'.
 --
 -- This returns @f 'Proxy'@ because @Proxy :: k -> Type@ has the right kind and
 -- carries no runtime information.  It's isomorphic to @Const ()@ but easier to

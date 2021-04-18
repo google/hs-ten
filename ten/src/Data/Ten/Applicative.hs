@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Provides an analog of 'Applicative' over arity-1 type constructors.
+
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -39,15 +41,21 @@ import Data.Wrapped (Wrapped1(..))
 import Data.Ten.Functor (Functor10, (<$>!))
 
 infixl 4 <*>!
--- | Analogous to 'Applicative'.
+-- | 'Applicative' over arity-1 type constructors.
+--
+-- See also 'Functor10' and 'Data.Ten.Foldable.Foldable10'.
 class Functor10 f => Applicative10 f where
   {-# MINIMAL pure10, ((<*>!) | liftA210) #-}
 
+  -- | Lift a parametric @m@ value into an @f m@.
   pure10 :: (forall a. m a) -> f m
 
+  -- | ('<*>') for 'Applicative10': zip two @f@s with 'runArr10'.
   (<*>!) :: f (Arr10 m n) -> f m -> f n
   (<*>!) = liftA210 (\ (Arr10 f') x' -> f' x')
 
+  -- | 'Control.Applicative.liftA2' for 'Applicative10': zip two @f@s with a
+  -- parametric function.
   liftA210 :: (forall a. m a -> n a -> o a) -> f m -> f n -> f o
   liftA210 f x y = (Arr10 . f) <$>! x <*>! y
 
@@ -75,9 +83,15 @@ instance (Applicative f, Applicative10 g) => Applicative10 (f :.: g) where
   pure10 x = Comp1 $ pure (pure10 x)
   liftA210 f (Comp1 x) (Comp1 y) = Comp1 $ liftA2 (liftA210 f) x y
 
+-- | A function @m a -> n a@ wrapped in a newtype for use as a type parameter.
+--
+-- This is used to represent the partially-applied functions in the left side
+-- of ('<*>!').
 newtype Arr10 m n a = Arr10 { runArr10 :: m a -> n a }
 
-liftA310 :: Applicative10 f
+-- | 'Control.Applicative.liftA3' for 'Applicative10'.
+liftA310
+  :: Applicative10 f
   => (forall a. m a -> n a -> o a -> p a) -> f m -> f n -> f o -> f p
 liftA310 f xs ys zs =
   (\x -> Arr10 (Arr10 . f x)) <$>! xs <*>! ys <*>! zs

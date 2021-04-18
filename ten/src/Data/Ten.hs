@@ -29,7 +29,7 @@
 -- @(k -> Type) -> Type@.
 -- These are essentially 'Functor's with additional \"tag\" types
 -- available at each occurrence of the argument.  Applying them to
--- 'Identity', you get essentially records, but other type parameters
+-- @Identity@, you get essentially records, but other type parameters
 -- give other interesting objects.
 -- - 'Constrained10', which allows a 'Functor10' to provide instances of a
 -- typeclass for each of its elements.  This adds a lot of power to the
@@ -45,7 +45,7 @@
 -- The provided GHC.Generics-based deriving functionality is meant to be used
 -- with the DerivingVia extension.  To get the full suite of classes on a
 -- generic-record type, make sure every field is either an 'Ap10', another
--- nested generic-record, or a 'Record00' type applied to one of the above.
+-- nested generic-record, or a @Record00@ type applied to one of the above.
 -- Then, just add the deriving clauses:
 --
 -- data MyType = MyType { ... }
@@ -161,6 +161,7 @@ instance Applicative10 (Ap10 a) where
 instance cxt a => Constrained10 cxt (Ap10 a) where
   constrained10 (Ap10 x) = Ap10 (Constrained x)
 
+-- | An 'Iso' between an @Ap10 a m@ wrapper and its contained @m a@.
 ap10 :: Iso (Ap10 s fs) (Ap10 t ft) (fs s) (ft t)
 ap10 = iso unAp10 Ap10
 
@@ -336,10 +337,11 @@ instance cxt a => Constrained10 cxt (EitherF10 a f) where
 -- functor-like class for @(Type -> Type) -> (Type -> Type)@, which we don't
 -- currently have.
 
-comp :: Iso ((f :.: g) a) ((h :.: i) b) (f (g a)) (h (i b))
+-- | An 'Iso' between a @(m :.: n) a@ wrapper and its contained @m (n a)@.
+comp :: Iso ((m :.: n) a) ((k :.: l) b) (m (n a)) (k (l b))
 comp = iso unComp1 Comp1
 
--- | 'Product' on 'Functor10's.
+-- | (':*:') on 'Functor10's.
 data ProductF10 f g (m :: k -> Type) = ProductF10 (f m) (g m)
   deriving Generic
   deriving Portray via Wrapped Generic (ProductF10 f g m)
@@ -369,7 +371,7 @@ instance (Constrained10 cxt f, Constrained10 cxt g)
     ProductF10 (unconstrained10 x) (unconstrained10 y)
 
 
--- | 'Sum' on 'Functor1's.
+-- | (':+:') on 'Functor10's.
 data SumF10 f g (m :: k -> Type) = InLF10 (f m) | InRF10 (g m)
   deriving Generic
   deriving Portray via Wrapped Generic (SumF10 f g m)
@@ -396,7 +398,7 @@ instance (Constrained10 cxt f, Constrained10 cxt g)
   unconstrained10 (InRF10 x) = InRF10 (unconstrained10 x)
 
 
--- | A 'Functor1' made by applying the argument to an existential type.
+-- | A 'Functor10' made by applying the argument to an existential type.
 data Exists (m :: k -> Type) where
   Exists :: forall a m. m a -> Exists m
 

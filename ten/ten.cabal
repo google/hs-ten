@@ -4,11 +4,11 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7be2042b77d9dee2a743cfaf66003f0b6ed9d2f1bc3b62efd24b9e62f7c83920
+-- hash: dd7ee7a07fba8cb4407c8235319153e3e6ef4b01ed79a760c4df6c5b9ef624d2
 
 name:           ten
 version:        0.1.0.0
-synopsis:       A typeclass hierarchy like Functor, etc. for @(k -> Type) -> Type@.
+synopsis:       Typeclasses like Functor, etc. over arity-1 type constructors.
 description:    This provides a mirror of the traditional typeclass hierarchy for types of
                 kind @(k -> Type) -> Type@, or functors from the category __Hask{k}__ to
                 __Hask__, where __Hask{k}__ denotes the category whose objects are mappings

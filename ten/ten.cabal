@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: dd9c404cccf474e6e4bb8391cde530ca4ef307b567ae31da3a583d5d9e3376a1
+-- hash: 13e87edbe99483c96552eafb42c9210c04dcfc1cde5ed7ebf300d3a968166ae3
 
 name:           ten
 version:        0.1.0.0
@@ -45,6 +45,7 @@ library
       Data.Ten.Constrained
       Data.Ten.Foldable
       Data.Ten.Functor
+      Data.Ten.Representable
       Data.Ten.Traversable
   other-modules:
       Paths_ten

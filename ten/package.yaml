@@ -63,6 +63,7 @@ library:
     - Data.Ten.Constrained
     - Data.Ten.Foldable
     - Data.Ten.Functor
+    - Data.Ten.Representable
     - Data.Ten.Traversable
 
 tests:

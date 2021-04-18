@@ -97,6 +97,8 @@ module Data.Ten
   , module Data.Ten.Constrained
     -- ** Representable10
   , module Data.Ten.Representable
+    -- ** Update10
+  , module Data.Ten.Update
 
     -- * Standard 'Functor10's
     -- ** Over types
@@ -123,6 +125,7 @@ import Data.Ten.Foldable
 import Data.Ten.Functor
 import Data.Ten.Representable
 import Data.Ten.Traversable
+import Data.Ten.Update
 
 (.:) :: (q -> r) -> (a -> b -> q) -> a -> b -> r
 (.:) = (.) . (.)

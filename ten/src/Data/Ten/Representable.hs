@@ -64,9 +64,6 @@ class Applicative10 f => Representable10 (f :: (k -> Type) -> Type) where
   -- | Build an @f m@ by applying a parametric function to each "index".
   tabulate10 :: (forall a. Rep10 f a -> m a) -> f m
 
-  -- | Update an @f m@ at a given index.
-  update10 :: Rep10 f a -> m a -> f m -> f m
-
 -- | Turn a record field selector into a 'Rep10'.
 --
 -- See also 'Data.Ten.Lens.rep10'.

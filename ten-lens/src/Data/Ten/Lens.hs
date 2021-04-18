@@ -19,9 +19,10 @@
 
 module Data.Ten.Lens (rep10, ix10, ap10, comp) where
 
-import Control.Lens (Lens', Getting, Iso, iso, lens, view)
+import Control.Lens (Getting, Iso, iso, view)
 
 import Data.Ten.Representable (Representable10(..), rep10')
+import Data.Ten.Update (ix10)
 import Data.Ten (Ap10(..), (:.:)(..))
 
 -- | Turn a record field lens into a 'Rep10'.
@@ -32,10 +33,6 @@ rep10
   :: Representable10 f
   => Getting (Rep10 f a) (f (Rep10 f)) (Rep10 f a) -> Rep10 f a
 rep10 l = rep10' (view l)
-
--- | A 'Control.Lens.Lens' to the field identified by a given 'Rep10'.
-ix10 :: Representable10 f => Rep10 f a -> Lens' (f m) (m a)
-ix10 i = lens (`index10` i) (flip (update10 i))
 
 -- | An 'Iso' between an @Ap10 a m@ wrapper and its contained @m a@.
 ap10 :: Iso (Ap10 s fs) (Ap10 t ft) (fs s) (ft t)

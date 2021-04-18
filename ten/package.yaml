@@ -63,6 +63,7 @@ library:
     - Data.Ten.Functor
     - Data.Ten.Representable
     - Data.Ten.Traversable
+    - Data.Ten.Update
 
 tests:
   Traversable10-test:

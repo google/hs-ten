@@ -16,6 +16,7 @@ resolver: lts-17.9
 
 packages:
 - ten
+- ten-lens
 
 extra-deps:
 - github: google/hs-attenuation

@@ -24,9 +24,9 @@
 -- | Provides an analog of @Representable@ over arity-1 type constructors.
 
 module Data.Ten.Representable
-         ( Representable10(..), ix10
+         ( Representable10(..)
          , imap10, ifoldMap10, ifoldl10, ifoldr10, itraverse10
-         , rep10, rep10'
+         , rep10'
          , distributeRep10, collectRep10
          ) where
 
@@ -34,8 +34,6 @@ import Data.Functor.Const (Const(..))
 import Data.Kind (Type)
 import Data.Monoid (Dual(..), Endo(..))
 import GHC.Generics ((:.:)(..))
-
-import Control.Lens (Lens', Getting, lens, view)
 
 import Data.Ten.Applicative (Applicative10)
 import Data.Ten.Foldable (Foldable10, fold10)
@@ -71,22 +69,9 @@ class Applicative10 f => Representable10 (f :: (k -> Type) -> Type) where
 
 -- | Turn a record field selector into a 'Rep10'.
 --
--- See also 'rep10'.
+-- See also 'Data.Ten.Lens.rep10'.
 rep10' :: Representable10 f => (f (Rep10 f) -> Rep10 f a) -> Rep10 f a
 rep10' = ($ tabulate10 id)
-
--- | Turn a record field lens into a 'Rep10'.
---
--- Since 'tabulate10' can give us a record of 'Rep10's, all we have to do to
--- convert a lens into a 'Rep10' is use 'view' to extract the desired 'Rep10'.
-rep10
-  :: Representable10 f
-  => Getting (Rep10 f a) (f (Rep10 f)) (Rep10 f a) -> Rep10 f a
-rep10 l = rep10' (view l)
-
--- | A 'Control.Lens.Lens' to the field identified by a given 'Rep10'.
-ix10 :: Representable10 f => Rep10 f a -> Lens' (f m) (m a)
-ix10 i = lens (`index10` i) (flip (update10 i))
 
 -- | 'Data.Ten.Functor10.fmap10' with an index parameter.
 --

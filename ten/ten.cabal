@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5d942d483dfd9a6b85ae7221b863749ed7f7b31b2ef90c20b4636d8ae3485523
+-- hash: 179afb6e143d864a6b0fd782037e0ab6d153103a393bb387c39719a44f11fc7c
 
 name:           ten
 version:        0.1.0.0
@@ -57,7 +57,6 @@ library
     , constraints
     , data-default-class
     , deepseq
-    , lens
     , portray >=0.1
     , portray-pretty >=0.1
     , pretty
@@ -78,7 +77,6 @@ test-suite Traversable10-test
     , constraints
     , data-default-class
     , deepseq
-    , lens
     , portray >=0.1
     , portray-pretty >=0.1
     , pretty

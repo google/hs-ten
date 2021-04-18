@@ -100,19 +100,17 @@ module Data.Ten
 
     -- * Standard 'Functor10's
     -- ** Over types
-  , Ap10(..), ap10, Const10(..), Pair10(..), Maybe10(..), Either10(..)
+  , Ap10(..), Const10(..), Pair10(..), Maybe10(..), Either10(..)
     -- ** Over type constructors
   , ConstF10(..), PairF10(..), EitherF10(..), Exists(..)
     -- ** Over 'Functor10's
-  , (:.:)(..), comp
-  , ProductF10(..), SumF10(..)
+  , (:.:)(..), ProductF10(..), SumF10(..)
   ) where
 
 import Control.DeepSeq (NFData)
 import Data.Kind (Type)
 import GHC.Generics
 
-import Control.Lens (Iso, iso)
 import Data.Default.Class (Default)
 import Data.Portray (Portray(..), Portrayal(..))
 import Data.Portray.Pretty (WrappedPortray(..))
@@ -160,10 +158,6 @@ instance Applicative10 (Ap10 a) where
 
 instance cxt a => Constrained10 cxt (Ap10 a) where
   constrained10 (Ap10 x) = Ap10 (Constrained x)
-
--- | An 'Iso' between an @Ap10 a m@ wrapper and its contained @m a@.
-ap10 :: Iso (Ap10 s fs) (Ap10 t ft) (fs s) (ft t)
-ap10 = iso unAp10 Ap10
 
 -- | A 'Functor10' made by applying the argument to the first of two types.
 newtype Const10 (a :: k1) (b :: k2) (f :: k1 -> Type) = Const10 (f a)
@@ -336,10 +330,6 @@ instance cxt a => Constrained10 cxt (EitherF10 a f) where
 -- The latter instance is actually implemented, but the former requires a
 -- functor-like class for @(Type -> Type) -> (Type -> Type)@, which we don't
 -- currently have.
-
--- | An 'Iso' between a @(m :.: n) a@ wrapper and its contained @m (n a)@.
-comp :: Iso ((m :.: n) a) ((k :.: l) b) (m (n a)) (k (l b))
-comp = iso unComp1 Comp1
 
 -- | (':*:') on 'Functor10's.
 data ProductF10 f g (m :: k -> Type) = ProductF10 (f m) (g m)

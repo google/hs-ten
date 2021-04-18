@@ -48,7 +48,6 @@ dependencies:
   - constraints
   - data-default-class
   - deepseq
-  - lens
   - portray >= 0.1
   - portray-pretty >= 0.1
   - pretty

@@ -30,7 +30,7 @@ module Data.Ten.Foldable
          , fold10, foldr10, foldl10, traverse10_, sequenceA10_
          ) where
 
-import Data.Functor.Constant (Constant(..))
+import Data.Functor.Const (Const(..))
 import Data.Kind (Type)
 import Data.Monoid (Dual(..), Endo(..))
 import GHC.Generics
@@ -77,9 +77,9 @@ instance (Foldable10 f, Foldable10 g) => Foldable10 (f :*: g) where
 instance (Foldable f, Foldable10 g) => Foldable10 (f :.: g) where
   foldMap10 f (Comp1 x) = foldMap (foldMap10 f) x
 
--- | Given a structure over @'Constant' m@, return the ('<>') of all elements.
-fold10 :: (Foldable10 t, Monoid m) => t (Constant m) -> m
-fold10 = foldMap10 getConstant
+-- | Given a structure over @'Const' m@, return the ('<>') of all elements.
+fold10 :: (Foldable10 t, Monoid m) => t (Const m) -> m
+fold10 = foldMap10 getConst
 
 -- | Right-associative fold over a 'Foldable10'.
 foldr10 :: Foldable10 t => (forall a. m a -> b -> b) -> b -> t m -> b

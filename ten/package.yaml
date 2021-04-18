@@ -53,7 +53,6 @@ dependencies:
   - portray-pretty >= 0.1
   - pretty
   - wrapped
-  - transformers
 
 library:
   source-dirs: src

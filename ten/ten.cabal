@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: dd7ee7a07fba8cb4407c8235319153e3e6ef4b01ed79a760c4df6c5b9ef624d2
+-- hash: 5d942d483dfd9a6b85ae7221b863749ed7f7b31b2ef90c20b4636d8ae3485523
 
 name:           ten
 version:        0.1.0.0
@@ -61,7 +61,6 @@ library
     , portray >=0.1
     , portray-pretty >=0.1
     , pretty
-    , transformers
     , wrapped
   default-language: Haskell2010
 
@@ -87,6 +86,5 @@ test-suite Traversable10-test
     , ten
     , test-framework
     , test-framework-hunit
-    , transformers
     , wrapped
   default-language: Haskell2010

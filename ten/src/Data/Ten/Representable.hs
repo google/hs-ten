@@ -30,7 +30,7 @@ module Data.Ten.Representable
          , distributeRep10, collectRep10
          ) where
 
-import Data.Functor.Constant (Constant(..))
+import Data.Functor.Const (Const(..))
 import Data.Kind (Type)
 import Data.Monoid (Dual(..), Endo(..))
 import GHC.Generics ((:.:)(..))
@@ -102,7 +102,7 @@ imap10 f fm = tabulate10 (\i -> f i (fm `index10` i))
 ifoldMap10
   :: (Monoid w, Foldable10 f, Representable10 f)
   => (forall a. Rep10 f a -> m a -> w) -> f m -> w
-ifoldMap10 f fm = fold10 $ imap10 (Constant .: f) fm
+ifoldMap10 f fm = fold10 $ imap10 (Const .: f) fm
 
 -- | 'Data.Ten.Foldable.foldl10' with an index parameter.
 ifoldl10

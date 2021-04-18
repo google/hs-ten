@@ -60,6 +60,7 @@ library:
   exposed-modules:
     - Data.Traversable10
     - Data.Ten.Applicative
+    - Data.Ten.Constrained
     - Data.Ten.Foldable
     - Data.Ten.Functor
     - Data.Ten.Traversable

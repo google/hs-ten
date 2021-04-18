@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a069e3ebf4b21be177f92497596be8d62effb93d4b10cce0591cb04068f46750
+-- hash: 2699c1785cca410d35f3a016bdc4175cd468aed64c750d206c760a91880dd012
 
 name:           ten
 version:        0.1.0.0
@@ -44,6 +44,7 @@ library
       Data.Ten.Ap
       Data.Ten.Applicative
       Data.Ten.Constrained
+      Data.Ten.Field
       Data.Ten.Foldable
       Data.Ten.Functor
       Data.Ten.Representable
@@ -62,6 +63,7 @@ library
     , portray >=0.1
     , portray-pretty >=0.1
     , pretty
+    , text
     , wrapped
   default-language: Haskell2010
 
@@ -86,5 +88,6 @@ test-suite Traversable10-test
     , ten
     , test-framework
     , test-framework-hunit
+    , text
     , wrapped
   default-language: Haskell2010

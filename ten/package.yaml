@@ -52,6 +52,7 @@ dependencies:
   - portray-pretty >= 0.1
   - pretty
   - wrapped
+  - text # only for Field10
 
 library:
   source-dirs: src
@@ -60,6 +61,7 @@ library:
     - Data.Ten.Ap
     - Data.Ten.Applicative
     - Data.Ten.Constrained
+    - Data.Ten.Field
     - Data.Ten.Foldable
     - Data.Ten.Functor
     - Data.Ten.Representable

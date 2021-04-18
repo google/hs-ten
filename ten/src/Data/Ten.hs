@@ -102,6 +102,7 @@ module Data.Ten
 
     -- * Standard 'Functor10's
   , module Data.Ten.Ap
+  , module Data.Ten.Field
     -- ** Over types
   , Const10(..), Pair10(..), Maybe10(..), Either10(..)
     -- ** Over type constructors
@@ -121,6 +122,7 @@ import Text.PrettyPrint.HughesPJClass (Pretty)
 import Data.Ten.Ap
 import Data.Ten.Applicative
 import Data.Ten.Constrained
+import Data.Ten.Field
 import Data.Ten.Foldable
 import Data.Ten.Functor
 import Data.Ten.Representable

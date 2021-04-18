@@ -88,10 +88,9 @@ module Data.Traversable10
     -- ** Functor10
     module Data.Ten.Functor
     -- ** Foldable10
-  , Foldable10(..), fold10, foldr10, foldl10, traverse10_, sequenceA10_
+  , module Data.Ten.Foldable
     -- ** Traversable10
-  , Traversable10(..), traverse10, sequenceA10
-  , Traversal10, LensLike10
+  , module Data.Ten.Traversable
     -- ** Applicative10
   , Applicative10(..), (<*!), (*>!)
   , liftA310
@@ -121,7 +120,6 @@ module Data.Traversable10
 
 import Control.Applicative (liftA2)
 import Control.DeepSeq (NFData)
-import Data.Coerce (coerce)
 import Data.Functor.Constant (Constant(..))
 import Data.Kind (Type)
 import Data.Monoid (Dual(..), Endo(..))
@@ -136,148 +134,12 @@ import Data.Portray.Pretty (WrappedPortray(..))
 import Data.Wrapped (Wrapped(..), Wrapped1(..))
 import Text.PrettyPrint.HughesPJClass (Pretty)
 
+import Data.Ten.Foldable
 import Data.Ten.Functor
+import Data.Ten.Traversable
 
 (.:) :: (q -> r) -> (a -> b -> q) -> a -> b -> r
 (.:) = (.) . (.)
-
-type LensLike10 f s t m n = (forall a. m a -> f (n a)) -> s -> f t
-
--- TODO(awpr): What to do with these?
--- type Getter10 s m = forall f. (Functor f, Contravariant f) => LensLike10 f s s m m
--- type Fold10 s m = forall f. (Applicative f, Contravariant f) => LensLike10 f s s m m
--- type Setter10 s t m n = LensLike10 Identity s t m n
--- type Lens10 s t m n = forall f. Functor f => LensLike10 f s t m n
-type Traversal10 s t m n = forall f. Applicative f => LensLike10 f s t m n
-
-class Foldable10 (t :: (k -> Type) -> Type) where
-  foldMap10 :: Monoid w => (forall a. m a -> w) -> t m -> w
-  default foldMap10
-    :: (Monoid w, Traversable10 t) => (forall a. m a -> w) -> t m -> w
-  foldMap10 f = getConstant . traverse10 (Constant . f)
-
-instance (Generic1 f, Foldable10 (Rep1 f))
-      => Foldable10 (Wrapped1 Generic1 f) where
-  foldMap10 f = foldMap10 f . from1 . unWrapped1
-
-instance Foldable10 (K1 i a)
-instance Foldable10 V1
-instance Foldable10 U1
-
-deriving instance Foldable10 f => Foldable10 (Rec1 f)
-deriving instance Foldable10 f => Foldable10 (M1 i c f)
-
-instance (Foldable10 f, Foldable10 g) => Foldable10 (f :+: g) where
-  foldMap10 f (L1 x) = foldMap10 f x
-  foldMap10 f (R1 x) = foldMap10 f x
-
-instance (Foldable10 f, Foldable10 g) => Foldable10 (f :*: g) where
-  foldMap10 f (l :*: r) = foldMap10 f l <> foldMap10 f r
-
-instance (Foldable f, Foldable10 g) => Foldable10 (f :.: g) where
-  foldMap10 f (Comp1 x) = foldMap (foldMap10 f) x
-
-fold10 :: (Foldable10 t, Monoid m) => t (Constant m) -> m
-fold10 = foldMap10 getConstant
-
-foldr10 :: Foldable10 t => (forall a. m a -> b -> b) -> b -> t m -> b
-foldr10 f z = flip appEndo z . foldMap10 (Endo . f)
-
-foldl10 :: Foldable10 t => (forall a. b -> m a -> b) -> b -> t m -> b
-foldl10 f z = flip appEndo z . getDual . foldMap10 (Dual . Endo . flip f)
-
-traverse10_
-  :: (Applicative f, Foldable10 t) => (forall a. m a -> f (n a)) -> t m -> f ()
-traverse10_ f = foldl10 (\a x -> a <* f x) (pure ())
-
-sequenceA10_ :: (Applicative f, Foldable10 t) => t (f :.: g) -> f ()
-sequenceA10_ = traverse10_ unComp1
-
--- | Analog of 'Traversable' for @(k -> Type) -> Type@ functors.
---
--- This is defined in terms of 'mapTraverse10' for two reasons:
---
--- * First, it makes it possible to use with GeneralizedNewtypeDeriving and
---   DerivingVia.  See
---   https://ryanglscott.github.io/2018/06/22/quantifiedconstraints-and-the-trouble-with-traversable/
---   for more details.
--- * Second, it uses fewer 'fmap's in some cases: when you need to re-apply a
---   constructor tag like 'L1' or 'R1' after calling 'traverse10' on the
---   payload, this would normally be an additional 'fmap', but with
---   'mapTraverse10' it can be fused into the underlying recursive call.  Less
---   crucially, the same trick applies when traversing multiple fields and
---   combining them back into a product type: the first call can use
---   'mapTraverse10' to pre-apply the function, and use '<*>' rather than
---   'liftA2' (which is often defined as an 'fmap' followed by a '<*>').
-class (Functor10 t, Foldable10 t) =>
-    Traversable10 (t :: (k -> Type) -> Type) where
-  mapTraverse10
-    :: forall f m n r
-     . Applicative f
-    => (t n -> r)
-    -> (forall a. m a -> f (n a))
-    -> t m -> f r
-
--- | Analog of 'traverse' for @(k -> Type) -> Type@ functors.
---
--- Given a function that takes the wrapped type @m a@ to @n a@ in an Applicative
--- @f@ for all @a@, visit all contained @m@s to convert from @t m@ to @t n@.
---
--- @m@ and @n@ here play the role of @a@ and @b@ in the normal 'traverse' type;
--- that is, instead of traversing to change a @Type@, we're traversing to change
--- a wrapper type constructor of kind @k -> Type@:
---
---     traverse
---       :: (Traversable t, Applicative f)
---       => (          a   -> f  b   ) -> t a -> f (t b)
---     traverse10
---       :: (Traversable10 t, Applicative f)
---       => (forall a. m a -> f (n a)) -> t m -> f (t n)
---
--- An equivalent type signature is:
---
---     traverse10 :: Traversable10 t => Traversal10 (t m) (t n) m n
-traverse10
-  :: forall t f m n
-   . (Traversable10 t, Applicative f)
-  => (forall a. m a -> f (n a))
-  -> t m -> f (t n)
-traverse10 = mapTraverse10 id
-
-instance (Generic1 f, Traversable10 (Rep1 f))
-      => Traversable10 (Wrapped1 Generic1 f) where
-  mapTraverse10 r f = mapTraverse10 (r . Wrapped1 . to1) f . from1 . unWrapped1
-
-instance Traversable10 (K1 i a) where
-  mapTraverse10 r _ k = pure (r $ coerce k)
-
-instance Traversable10 V1 where
-  mapTraverse10 _ _ x = case x of {}
-
-instance Traversable10 U1 where
-  mapTraverse10 r _ U1 = pure (r U1)
-
-instance Traversable10 f => Traversable10 (Rec1 f) where
-  mapTraverse10 r f (Rec1 x) = mapTraverse10 (r . Rec1) f x
-
-instance Traversable10 f => Traversable10 (M1 i c f) where
-  mapTraverse10 r f (M1 x) = mapTraverse10 (r . M1) f x
-
-instance (Traversable10 f, Traversable10 g) => Traversable10 (f :+: g) where
-  mapTraverse10 r f (L1 x) = mapTraverse10 (r . L1) f x
-  mapTraverse10 r f (R1 x) = mapTraverse10 (r . R1) f x
-
-instance (Traversable10 f, Traversable10 g) => Traversable10 (f :*: g) where
-  mapTraverse10 r f (x :*: y) =
-    mapTraverse10 (r .: (:*:)) f x <*> traverse10 f y
-
-instance (Traversable f, Traversable10 g) => Traversable10 (f :.: g) where
-  mapTraverse10 r f (Comp1 x) = r . Comp1 <$> traverse (traverse10 f) x
-
-sequenceA10
-  :: (Applicative f, Traversable10 t)
-  => t (f :.: g) -> f (t g)
-sequenceA10 = traverse10 coerce
 
 infixl 4 <*>!
 -- | Analogous to 'Applicative'.

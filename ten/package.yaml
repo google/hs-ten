@@ -59,7 +59,9 @@ library:
   source-dirs: src
   exposed-modules:
     - Data.Traversable10
+    - Data.Ten.Foldable
     - Data.Ten.Functor
+    - Data.Ten.Traversable
 
 tests:
   Traversable10-test:

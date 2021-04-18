@@ -25,8 +25,6 @@ import Data.Wrapped (Wrapped1(..))
 -- | A functor from the category @* -> Type@ to the category @*@.
 class Functor10 (f :: (k -> Type) -> Type) where
   fmap10 :: (forall a. m a -> n a) -> f m -> f n
-  -- default fmap10 :: Traversable10 f => (forall a. m a -> n a) -> f m -> f n
-  -- fmap10 f = runIdentity . traverse10 (Identity . f)
 
 instance (Generic1 f, Functor10 (Rep1 f))
       => Functor10 (Wrapped1 Generic1 f) where

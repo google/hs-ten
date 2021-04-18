@@ -79,32 +79,13 @@ withConstrained f (Constrained x) = f x
 
 -- | @Constrained10 cxt f@ means that in @f m@, all applications of @m@
 -- are to types @x@ that satisfy constraint @cxt@.
---
--- By having both 'constrained10' and 'unconstrained10' here, this is usable by
--- both covariant and contravariant functors.  For covariant functors,
--- 'constrained10' tags each value with the corresponding instance, and
--- 'unconstrained10' drops the instances.  For contravariant functors, the
--- roles are effectively reversed -- if an @f (Constrained cxt m)@ has some
--- applications of @Constrained cxt m@ in negative position, 'unconstrained10'
--- will automatically provide those constraints and leave just applications of
--- @m@ in negative position.
 class Constrained10 (cxt :: k -> Constraint) (f :: (k -> Type) -> Type) where
   -- | Recover instances of @cxt@ to accompany each @m@ element in @f@.
   constrained10 :: f m -> f (Constrained cxt m)
-  -- TODO(awpr):
-  -- default constrained10 :: Contravariant10 f => f m -> f (Constrained cxt m)
-  -- constrained10 = contramap10 (\ (Constrained x) -> x)
-
-  unconstrained10 :: f (Constrained cxt m) -> f m
-  default unconstrained10 :: Functor10 f => f (Constrained cxt m) -> f m
-  unconstrained10 = fmap10 (\ (Constrained x) -> x)
-
-  {-# MINIMAL constrained10 #-}
 
 instance (Generic1 f, Constrained10 cxt (Rep1 f))
       => Constrained10 cxt (Wrapped1 Generic1 f) where
   constrained10 = Wrapped1 . to1 . constrained10 . from1 . unWrapped1
-  unconstrained10 = Wrapped1 . to1 . unconstrained10 . from1 . unWrapped1
 
 instance Constrained10 cxt (K1 i a) where
   constrained10 (K1 x) = K1 x
@@ -123,17 +104,12 @@ instance (Constrained10 cxt f, Constrained10 cxt g)
   constrained10 (L1 x) = L1 (constrained10 x)
   constrained10 (R1 x) = R1 (constrained10 x)
 
-  unconstrained10 (L1 x) = L1 (unconstrained10 x)
-  unconstrained10 (R1 x) = R1 (unconstrained10 x)
-
 instance (Constrained10 cxt f, Constrained10 cxt g)
       => Constrained10 cxt (f :*: g) where
   constrained10 (l :*: r) = constrained10 l :*: constrained10 r
-  unconstrained10 (l :*: r) = unconstrained10 l :*: unconstrained10 r
 
 instance (Functor f, Constrained10 cxt g) => Constrained10 cxt (f :.: g) where
   constrained10 (Comp1 f) = Comp1 (fmap constrained10 f)
-  unconstrained10 (Comp1 f) = Comp1 (fmap unconstrained10 f)
 
 -- | 'fmap10' with access to an instance for every element.
 fmap10C

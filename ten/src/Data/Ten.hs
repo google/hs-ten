@@ -367,8 +367,6 @@ instance (Constrained10 cxt f, Constrained10 cxt g)
     => Constrained10 cxt (ProductF10 f g) where
   constrained10 (ProductF10 x y) =
     ProductF10 (constrained10 x) (constrained10 y)
-  unconstrained10 (ProductF10 x y) =
-    ProductF10 (unconstrained10 x) (unconstrained10 y)
 
 
 -- | (':+:') on 'Functor10's.
@@ -393,9 +391,6 @@ instance (Constrained10 cxt f, Constrained10 cxt g)
     => Constrained10 cxt (SumF10 f g) where
   constrained10 (InLF10 x) = InLF10 (constrained10 x)
   constrained10 (InRF10 x) = InRF10 (constrained10 x)
-
-  unconstrained10 (InLF10 x) = InLF10 (unconstrained10 x)
-  unconstrained10 (InRF10 x) = InRF10 (unconstrained10 x)
 
 
 -- | A 'Functor10' made by applying the argument to an existential type.

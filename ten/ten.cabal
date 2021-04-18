@@ -1,0 +1,86 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: b154766c1f8e90e6a65e121c55b83a8e366ad8f395905e073a44ba54459aa74f
+
+name:           ten
+version:        0.1.0.0
+synopsis:       A typeclass hierarchy like Functor, etc. for @(k -> Type) -> Type@.
+description:    This provides a mirror of the traditional typeclass hierarchy for types of
+                kind @(k -> Type) -> Type@, or functors from the category __Hask{k}__ to
+                __Hask__, where __Hask{k}__ denotes the category whose objects are mappings
+                from @k@ to @Type@, and whose morphisms are the parametric functions between
+                them.  In general, these functors look like variations on the theme of
+                "polymorphic records", also frequently described as "higher-kinded data".
+                .
+                We currently provide the following classes, which correspond directly to
+                their equivalents in "base" or "adjunctions": 'Functor10', 'Foldable10',
+                'Traversable10', 'Applicative10', and 'Representable10'.  Additionally, a
+                class 'Constrained10' provides instances for the argument of each occurrence
+                of the type parameter in a value.
+category:       Data
+homepage:       https://github.com/google/hs-ten#readme
+bug-reports:    https://github.com/google/hs-ten/issues
+author:         Andrew Pritchard <awpr@google.com>, Reiner Pope <reinerp@google.com>
+
+maintainer:     Andrew Pritchard <awpr@google.com>
+copyright:      2018-2021 Google LLC
+license:        Apache-2.0
+build-type:     Simple
+extra-source-files:
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/google/hs-ten
+  subdir: ten
+
+library
+  exposed-modules:
+      Data.Traversable10
+  other-modules:
+      Paths_ten
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Werror
+  build-depends:
+      base
+    , constraints
+    , data-default-class
+    , deepseq
+    , lens
+    , portray >=0.1
+    , portray-pretty >=0.1
+    , pretty
+    , transformers
+    , wrapped
+  default-language: Haskell2010
+
+test-suite Traversable10-test
+  type: exitcode-stdio-1.0
+  main-is: Traversable10Test.hs
+  other-modules:
+      Paths_ten
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Werror
+  build-depends:
+      HUnit
+    , base
+    , constraints
+    , data-default-class
+    , data-vec
+    , deepseq
+    , lens
+    , portray >=0.1
+    , portray-pretty >=0.1
+    , pretty
+    , test-framework
+    , test-framework-hunit
+    , transformers
+    , traversable10
+    , wrapped
+  default-language: Haskell2010

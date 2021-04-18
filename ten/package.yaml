@@ -1,0 +1,72 @@
+# Copyright 2018-2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: ten
+version: 0.1.0.0
+category: Data
+synopsis: A typeclass hierarchy like Functor, etc. for @(k -> Type) -> Type@.
+description: |
+  This provides a mirror of the traditional typeclass hierarchy for types of
+  kind @(k -> Type) -> Type@, or functors from the category __Hask{k}__ to
+  __Hask__, where __Hask{k}__ denotes the category whose objects are mappings
+  from @k@ to @Type@, and whose morphisms are the parametric functions between
+  them.  In general, these functors look like variations on the theme of
+  "polymorphic records", also frequently described as "higher-kinded data".
+
+  We currently provide the following classes, which correspond directly to
+  their equivalents in "base" or "adjunctions": 'Functor10', 'Foldable10',
+  'Traversable10', 'Applicative10', and 'Representable10'.  Additionally, a
+  class 'Constrained10' provides instances for the argument of each occurrence
+  of the type parameter in a value.
+license: Apache-2.0
+author: >
+  Andrew Pritchard <awpr@google.com>,
+  Reiner Pope <reinerp@google.com>
+copyright: 2018-2021 Google LLC
+maintainer: Andrew Pritchard <awpr@google.com>
+github: google/hs-ten/ten
+
+# Note: this causes CHANGELOG.md to be included in Hackage distributions.
+extra-source-files:
+  CHANGELOG.md
+
+ghc-options: -Wall -Werror
+
+dependencies:
+  - base
+  - constraints
+  - data-default-class
+  - deepseq
+  - lens
+  - portray >= 0.1
+  - portray-pretty >= 0.1
+  - pretty
+  - wrapped
+  - transformers
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - Data.Traversable10
+
+tests:
+  Traversable10-test:
+    main: Traversable10Test.hs
+    source-dirs: test
+    dependencies:
+      - HUnit
+      - data-vec
+      - traversable10
+      - test-framework
+      - test-framework-hunit

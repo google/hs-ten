@@ -44,6 +44,7 @@ extra-source-files:
 ghc-options: -Wall -Werror
 
 dependencies:
+  - adjunctions # only for Data.Functor.Update
   - base
   - constraints
   - data-default-class
@@ -57,6 +58,7 @@ dependencies:
 library:
   source-dirs: src
   exposed-modules:
+    - Data.Functor.Field
     - Data.Ten
     - Data.Ten.Ap
     - Data.Ten.Applicative
@@ -64,6 +66,7 @@ library:
     - Data.Ten.Field
     - Data.Ten.Foldable
     - Data.Ten.Functor
+    - Data.Ten.Internal
     - Data.Ten.Representable
     - Data.Ten.Traversable
     - Data.Ten.Update

@@ -29,11 +29,10 @@ import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
 import Data.Kind (Type)
 import Data.Proxy (Proxy(..))
-import Data.Text (Text)
 import qualified Data.Text as T
 import GHC.Generics
          ( Generic1(..)
-         , (:*:)(..)
+         , (:*:)(..), (:.:)(..)
          , M1(..), Rec1(..), U1(..)
          , Meta(..), S, C, D
          )
@@ -43,36 +42,9 @@ import Data.Wrapped (Wrapped1(..))
 import Text.PrettyPrint.HughesPJ (text)
 import Text.PrettyPrint.HughesPJClass (Pretty(..))
 
+import Data.Functor.Field (GFieldPaths(..))
 import Data.Ten.Ap (Ap10(..))
-
-data PathComponent
-  = NewtypeIso
-    -- ^ Zooming in on the contents of a newtype with 'coerce' or '_Wrapped'.
-  | NamedField !Text !Text
-    -- ^ Zooming in on a record field with the given named selector/lens.
-
-showPathComponent :: PathComponent -> ShowS
-showPathComponent NewtypeIso = showString "coerce"
-showPathComponent (NamedField selectorName _lensName) =
-  showString (T.unpack selectorName)
-
-showsPath :: Int -> [PathComponent] -> ShowS
-showsPath p path = case reverse path of
-  -- If the path ends up empty, that means either there's a bug, or we've added
-  -- support to GHC for a new Generics representation type equivalent to Ap10,
-  -- and we're looking at it as a standalone GFieldPaths00 instance.  Since
-  -- that'll be a newtype, we'll represent it as "coerce", since that should
-  -- work regardless of what it ends up being called.
-  []     -> showString "coerce"
-  [x]    -> showPathComponent x
-  (x:xs) -> showParen (p > 9) $
-    showPathComponent x .
-    flip (foldr (\y -> showString " . " . showPathComponent y)) xs
-
--- Guess the name of the lens corresponding to a field.
-dropUnderscore :: String -> String
-dropUnderscore ('_':x) = x
-dropUnderscore x = x
+import Data.Ten.Internal (PathComponent(..), dropUnderscore, showsPath)
 
 -- | A 'Rep10' type in the form of a parametric accessor function.
 newtype Field10 f a = Field10 { getField10 :: forall m. f m -> m a }
@@ -86,6 +58,7 @@ instance FieldPaths10 rec => Pretty (Field10 rec a) where
   -- Field10-constructor-and-function style, there's not really a good
   -- configuration mechanism to use for it.
   pPrintPrec _ p f = text (showsPrec (round p) f "")
+
 class FieldPaths10 (rec :: (k -> Type) -> Type) where
   fieldPaths10 :: rec (Const [PathComponent])
 
@@ -137,11 +110,9 @@ instance (GFieldPaths10 f, GFieldPaths10 g) => GFieldPaths10 (f :*: g) where
   gfieldPaths10 r = gfieldPaths10 r :*: gfieldPaths10 r
   {-# INLINE gfieldPaths10 #-}
 
-{-
-instance (GFieldPaths00 f, GFieldPaths10 g) => GFieldPaths10 (f :.: g) where
+instance (GFieldPaths f, GFieldPaths10 g) => GFieldPaths10 (f :.: g) where
   gfieldPaths10 r = Comp1 $
-    gfieldPaths00 $ \outer ->
+    gfieldPaths $ \outer ->
     gfieldPaths10 $ \inner ->
     r $ outer ++ inner
   {-# INLINE gfieldPaths10 #-}
--}

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2699c1785cca410d35f3a016bdc4175cd468aed64c750d206c760a91880dd012
+-- hash: 4b1673b6a29298c8d2ba96372301bc7c1dec02885b7aa508e6899792459f1083
 
 name:           ten
 version:        0.1.0.0
@@ -40,6 +40,7 @@ source-repository head
 
 library
   exposed-modules:
+      Data.Functor.Field
       Data.Ten
       Data.Ten.Ap
       Data.Ten.Applicative
@@ -47,6 +48,7 @@ library
       Data.Ten.Field
       Data.Ten.Foldable
       Data.Ten.Functor
+      Data.Ten.Internal
       Data.Ten.Representable
       Data.Ten.Traversable
       Data.Ten.Update
@@ -56,7 +58,8 @@ library
       src
   ghc-options: -Wall -Werror
   build-depends:
-      base
+      adjunctions
+    , base
     , constraints
     , data-default-class
     , deepseq
@@ -77,6 +80,7 @@ test-suite Traversable10-test
   ghc-options: -Wall -Werror
   build-depends:
       HUnit
+    , adjunctions
     , base
     , constraints
     , data-default-class

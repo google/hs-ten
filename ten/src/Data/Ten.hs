@@ -83,7 +83,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Traversable10
+module Data.Ten
   ( -- * Typeclasses
     -- ** Functor10
     module Data.Ten.Functor
@@ -141,7 +141,7 @@ import Data.Ten.Traversable
 -- | A 'Functor10' made by applying the argument to a fixed type.
 newtype Ap10 (a :: k) (f :: k -> Type) = Ap10 { unAp10 :: f a }
   deriving stock (Eq, Ord, Show, Generic)
-  deriving newtype (Pretty, Portray)
+  deriving newtype (Default, Pretty, Portray)
 
 instance (NFData a, NFData (f a)) => NFData (Ap10 a f)
 
@@ -160,6 +160,9 @@ instance Applicative10 (Ap10 a) where
 
 instance cxt a => Constrained10 cxt (Ap10 a) where
   constrained10 (Ap10 x) = Ap10 (Constrained x)
+
+ap10 :: Iso (Ap10 s fs) (Ap10 t ft) (fs s) (ft t)
+ap10 = iso unAp10 Ap10
 
 -- | A 'Functor10' made by applying the argument to the first of two types.
 newtype Const10 (a :: k1) (b :: k2) (f :: k1 -> Type) = Const10 (f a)
@@ -413,8 +416,3 @@ instance Foldable10 Exists where
 
 instance Traversable10 Exists where
   mapTraverse10 r f (Exists x) = r . Exists <$> f x
-
-ap10 :: Iso (Ap10 s fs) (Ap10 t ft) (fs s) (ft t)
-ap10 = iso unAp10 Ap10
-
-deriving instance Default (f a) => Default (Ap10 a f)

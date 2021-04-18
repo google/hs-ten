@@ -58,7 +58,7 @@ dependencies:
 library:
   source-dirs: src
   exposed-modules:
-    - Data.Traversable10
+    - Data.Ten
     - Data.Ten.Applicative
     - Data.Ten.Constrained
     - Data.Ten.Foldable

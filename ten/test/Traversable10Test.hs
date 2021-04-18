@@ -27,7 +27,7 @@ import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
 import Data.Monoid (Sum(..))
 
-import Data.Traversable10
+import Data.Ten
          ( Functor10(..), Foldable10(..), Traversable10
          , Applicative10(..), Constrained10
          , Ap10(..), Pair10(..)

@@ -19,24 +19,12 @@ packages:
 - ten-lens
 
 extra-deps:
-- github: google/hs-attenuation
-  commit: a9005d99bd6245b9a1b498f0f0f17e52660bbab2
-- github: google/hs-dependent-literals
-  commit: 2d863f13e6929bde55a2cc7fe629b130049fef47
-  subdirs:
-    - numeric-kinds
-    - snumber
-- github: google/hs-wrapped
-  commit: e6d3131dda318173009b5158312ecb6c9db5c35d
-  subdirs:
-    - wrapped
-- github: google/hs-fin-vec
-  commit: 583fb8f85ff68b01875c2aabeeba158eb93681f2
-  subdirs:
-    - fin-int
-    - short-vec
 - github: google/hs-portray
   commit: b60db92fa430b8ff4ef170c57b86500885c25645
   subdirs:
     - portray
     - portray-pretty
+- github: google/hs-wrapped
+  commit: e6d3131dda318173009b5158312ecb6c9db5c35d
+  subdirs:
+    - wrapped

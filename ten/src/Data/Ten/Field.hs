@@ -12,6 +12,13 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Provides 'Generic1' derivation of @Representable10@ based on 'Field10'.
+--
+-- Like with "Data.Functor.Field", we use parametric functions
+-- @forall m. f m -> m a@ to identify positions tagged with type @a@ within
+-- @f@.  This leads to instances for 'Data.Ten.Representable.Representable10'
+-- and 'Data.Ten.Update.Update10'.
+
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -23,7 +30,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Ten.Field (Field10(..), FieldPaths10(..)) where
+module Data.Ten.Field (Field10(..), FieldPaths10(..), GFieldPaths10(..)) where
 
 import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
@@ -48,7 +55,7 @@ import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Internal (PathComponent(..), dropUnderscore, showsPath)
 import {-# SOURCE #-} Data.Ten.Update (Update10, EqualityTable(..), equalityTable)
 
--- | A 'Rep10' type in the form of a parametric accessor function.
+-- | A 'Data.Ten.Representable.Rep10' type as a parametric accessor function.
 newtype Field10 f a = Field10 { getField10 :: forall m. f m -> m a }
 
 instance Update10 f => TestEquality (Field10 f) where
@@ -65,6 +72,7 @@ instance FieldPaths10 rec => Pretty (Field10 rec a) where
   -- configuration mechanism to use for it.
   pPrintPrec _ p f = text (showsPrec (round p) f "")
 
+-- | Provides a path of field selectors / lenses identifying each "field".
 class FieldPaths10 (rec :: (k -> Type) -> Type) where
   fieldPaths10 :: rec (Const [PathComponent])
 
@@ -73,6 +81,7 @@ instance (Generic1 rec, GFieldPaths10 (Rep1 rec))
   fieldPaths10 = Wrapped1 . to1 $ gfieldPaths10 Const
   {-# INLINE fieldPaths10 #-}
 
+-- | 'Generic1' implementation of 'FieldPaths10'.
 class GFieldPaths10 (rec :: (k -> Type) -> Type) where
   gfieldPaths10 :: (forall a. [PathComponent] -> r a) -> rec r
 

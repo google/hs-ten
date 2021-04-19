@@ -26,6 +26,7 @@
 module Data.Ten.Update
          ( Update10(..), updateRep10, ixRep10, FieldSetter10(..)
          , EqualityTable(..), equalityTable
+         , GUpdate10(..)
          ) where
 
 import Data.Functor ((<&>))
@@ -48,6 +49,9 @@ import Data.Ten.Field (Field10(..))
 import Data.Ten.Internal (mapStarFst, mapStarSnd)
 import Data.Ten.Representable (Representable10(..), GTabulate10(..))
 
+-- | Extends 'Representable10' with support for modifying elements.
+--
+-- See also 'Data.Functor.Update.Update'.
 class Representable10 f => Update10 (f :: (k -> Type) -> Type) where
   -- | Modify an @f m@ at a given index.
   overRep10 :: Rep10 f a -> (m a -> m a) -> f m -> f m
@@ -66,8 +70,16 @@ ixRep10
   => Rep10 f a -> (m a -> g (m a)) -> f m -> g (f m)
 ixRep10 i f = \fm -> f (index10 fm i) <&> \fma -> updateRep10 i fma fm
 
+-- | A newtype wrapper to store tables of equality witnesses in @f@.
 newtype EqualityTable f a = EqualityTable (f (Maybe :.: ((:~:) a)))
 
+-- | Implementation detail of @'Data.Type.Equality.TestEquality' ('Field10' f)@.
+--
+-- This is a pre-populated table of @'Maybe' (a ':~:' b)@s, with 'Just's in the
+-- elements where the inner position is the same as the outer position, i.e.
+-- along the "diagonal".  Then we can test two @forall m. f m -> m a@ functions
+-- for equality, by applying them in turn to the two layers of @f@, and see if
+-- we reach a 'Just' or a 'Nothing'.
 equalityTable :: Update10 f => f (EqualityTable f)
 equalityTable = tabulate10 $ \i -> EqualityTable $
   updateRep10 i (Comp1 (Just Refl)) (pure10 (Comp1 Nothing))
@@ -84,6 +96,7 @@ instance ( Generic1 f
      setters :: f (FieldSetter10 f)
      setters = setters10
 
+-- | 'Generic1' implementation of 'Update10'.
 class GUpdate10 (rec :: (k -> Type) -> Type) where
   gsetters10
     :: (forall a. (forall m. (m a -> m a) -> rec m -> rec m) -> r a)
@@ -120,8 +133,9 @@ instance (Update f, GUpdate10 g) => GUpdate10 (f :.: g) where
     r $ \f -> Comp1 . overRep i (s f) . unComp1
   {-# INLINE gsetters10 #-}
 
-newtype FieldSetter10 rec a = FS10
-  { runFS10 :: forall m. (m a -> m a) -> rec m -> rec m }
+-- | A newtype wrapper to store field modifier functions in @f@.
+newtype FieldSetter10 f a = FS10
+  { runFS10 :: forall m. (m a -> m a) -> f m -> f m }
 
 setters10 :: (Generic1 f, GUpdate10 (Rep1 f)) => f (FieldSetter10 f)
 setters10 = to1 $ gsetters10 (\overI -> FS10 $ \f -> to1 . overI f . from1)

@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Provides an analog of @Representable@ over arity-1 type constructors.
+
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -26,8 +28,6 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
-
--- | Provides an analog of @Representable@ over arity-1 type constructors.
 
 module Data.Ten.Representable
          ( Representable10(..)
@@ -141,6 +141,7 @@ collectRep10
   => (a -> f m) -> w a -> f (w :.: m)
 collectRep10 f wa = distributeRep10 (f <$> wa)
 
+-- | The 'Generic1' implementation of 'tabulate10' based on 'Field10'.
 class GTabulate10 (rec :: (k -> Type) -> Type) where
   gtabulate10 :: (forall a. Field10 rec a -> r a) -> rec r
 

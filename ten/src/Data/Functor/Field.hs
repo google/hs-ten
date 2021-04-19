@@ -12,6 +12,15 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Provides 'Generic1' derivation of 'Representable' based on 'Field'.
+--
+-- This relies on the observation that a parametric function
+-- @forall a. f a -> a@ is isomorphic to the set of "indices" of @f@, i.e.
+-- @'Rep' f@.  With the appropriate instances, we can do anything with it that
+-- we could with a hand-written ADT 'Rep' type.  So, this module provides a way
+-- to use exactly that type as 'Rep', and the needed instances to make it
+-- convenient to use.
+
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -25,7 +34,7 @@
 
 module Data.Functor.Field
          ( Field(..)
-         , FieldRep(..), GFieldPaths(..), GTabulate(..)
+         , FieldRep(..), FieldPaths(..), GFieldPaths(..), GTabulate(..)
          ) where
 
 import Data.Coerce (coerce)
@@ -134,6 +143,9 @@ instance (GFieldPaths f, GFieldPaths g) => GFieldPaths (f :.: g) where
 class GTabulate rec where
   gtabulate :: (Field rec -> r) -> rec r
 
+-- | A newtype carrying instances for use with @DerivingVia@.
+--
+-- This provides 'Applicative', 'Monad', 'Representable', and 'Update'.
 newtype FieldRep f a = FieldRep (f a)
   deriving Functor
 

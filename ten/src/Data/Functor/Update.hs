@@ -39,6 +39,11 @@ import Data.Functor.Rep (Representable(..))
 import Data.Functor.Field (Field(..), GTabulate(..), FieldRep(..))
 import Data.Ten.Internal (mapStarFst, mapStarSnd)
 
+-- | Extends 'Representable' with support for modifying elements.
+--
+-- If @'Eq' ('Rep' f)@ is available, this is already possible by roundabout
+-- means, but this class lets instances provide a more direct method that
+-- doesn't require per-field equality tests.
 class Representable f => Update f where
   overRep :: Rep f -> (a -> a) -> f a -> f a
 
@@ -62,14 +67,17 @@ instance (Generic1 f, GTabulate (Rep1 f), GUpdate (Rep1 f), Functor f)
     setters_ :: f (FieldSetter f)
     setters_ = setters
 
+-- | Implementation detail of @'Eq' ('Field' f)@.
+--
+-- This is a pre-populated table of 'Bool's, with 'True's in the elements where
+-- the inner position is the same as the outer position, i.e. along the
+-- "diagonal".  Then we can test two @forall a. f a -> a@ functions for
+-- equality, by applying them in turn to the two layers of @f@, and see if we
+-- reach a 'True' or a 'False'.
 equalityTable :: Update f => f (f Bool)
 equalityTable = tabulate (\i -> updateRep i True (tabulate (const False)))
 
--- | The 'Generic1' implementation of 'GUpdate'.
---
--- As with 'GTabulate00', this is used rather than 'GUpdate' to handle
--- sub-records, so derive this in order to allow using your type as a nested
--- record.
+-- | The 'Generic1' implementation of 'Update'.
 class GUpdate rec where
   gsetters :: ((forall a. (a -> a) -> rec a -> rec a) -> r) -> rec r
 

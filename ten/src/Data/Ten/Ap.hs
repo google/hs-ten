@@ -12,6 +12,16 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Provides a field wrapper type to make @Generic1@ work with @Functor10@ etc.
+--
+-- GHC can't derive 'GHC.Generics.Generic1' instances for types that apply
+-- their type parameter to a constant type (e.g. @data Thing f = Thing (f
+-- Int)@, but it can handle the equivalent type when the application is hidden
+-- under a newtype: @data Thing f = Thing (Ap10 Int f)@.  So, by wrapping each
+-- field in this newtype and providing the appropriate instances, we can use
+-- Generics to derive instances for the whole hierarchy of
+-- 'Data.Ten.Functor.Functor10' and related classes.
+
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -28,7 +38,7 @@ import Data.Default.Class (Default(..))
 import Data.Portray (Portray)
 import Text.PrettyPrint.HughesPJClass (Pretty)
 
--- | A 'Functor10' made by applying the argument to a fixed type.
+-- | A 'Data.Ten.Functor.Functor10' made by applying the argument to some type.
 newtype Ap10 (a :: k) (f :: k -> Type) = Ap10 { unAp10 :: f a }
   deriving stock (Eq, Ord, Show, Generic)
   deriving newtype (Default, Pretty, Portray)

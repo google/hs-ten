@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Internal utilities used by multiple modules.
+
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -21,17 +23,23 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import GHC.Generics ((:*:)(..))
 
+-- | The names of a lens and field selector, or @coerce@/@_Wrapped@.
+--
+-- Used in deriving 'Show'/'Text.PrettyPrint.HughesPJClass.Pretty' instances
+-- for field selector newtypes.
 data PathComponent
   = NewtypeIso
-    -- ^ Zooming in on the contents of a newtype with 'coerce' or '_Wrapped'.
+    -- ^ Zooming in on the contents of a newtype with @coerce@ or @_Wrapped@.
   | NamedField !Text !Text
     -- ^ Zooming in on a record field with the given named selector/lens.
 
+-- | Convert a 'PathComponent' to a 'String', with a suffix.
 showPathComponent :: PathComponent -> ShowS
 showPathComponent NewtypeIso = showString "coerce"
 showPathComponent (NamedField selectorName _lensName) =
   showString (T.unpack selectorName)
 
+-- | Convert a list of 'PathComponent's to a 'String', a la 'showsPrec'.
 showsPath :: Int -> [PathComponent] -> ShowS
 showsPath p path = case reverse path of
   -- If the path ends up empty, that means either there's a bug, or we've added
@@ -45,19 +53,23 @@ showsPath p path = case reverse path of
     showPathComponent x .
     flip (foldr (\y -> showString " . " . showPathComponent y)) xs
 
--- Guess the name of the lens corresponding to a field.
+-- | Guess the name of the lens corresponding to a field.
 dropUnderscore :: String -> String
 dropUnderscore ('_':x) = x
 dropUnderscore x = x
 
+-- | Access the left side of a (':*:').
 starFst :: (f :*: g) m -> f m
 starFst (f :*: _) = f
 
+-- | Access the right side of a (':*:').
 starSnd :: (f :*: g) m -> g m
 starSnd (_ :*: g) = g
 
+-- | Modify the left side of a (':*:').
 mapStarFst :: (f m -> f m) -> (f :*: g) m -> (f :*: g) m
 mapStarFst h (f :*: g) = h f :*: g
 
+-- | Modify the right side of a (':*:').
 mapStarSnd :: (g m -> g m) -> (f :*: g) m -> (f :*: g) m
 mapStarSnd h (f :*: g) = f :*: h g

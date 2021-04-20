@@ -32,7 +32,7 @@
 module Data.Ten.Representable
          ( Representable10(..)
          , imap10, ifoldMap10, ifoldl10, ifoldr10, itraverse10
-         , rep10'
+         , rep10', field10'
          , distributeRep10, collectRep10
          , GTabulate10(..)
          ) where
@@ -88,6 +88,14 @@ class Applicative10 f => Representable10 (f :: (k -> Type) -> Type) where
 -- See also 'Data.Ten.Lens.rep10'.
 rep10' :: Representable10 f => (f (Rep10 f) -> Rep10 f a) -> Rep10 f a
 rep10' = ($ tabulate10 id)
+
+-- | Turn a record field selector targeting 'Ap10' into a 'Rep10'.
+--
+-- See also 'Data.Ten.Lens.rep10'.
+field10'
+  :: Representable10 rec
+  => (rec (Rep10 rec) -> Ap10 a (Rep10 rec)) -> Rep10 rec a
+field10' f = rep10' (unAp10 . f)
 
 -- | 'Data.Ten.Functor10.fmap10' with an index parameter.
 --

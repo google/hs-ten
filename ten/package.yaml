@@ -67,6 +67,7 @@ library:
     - Data.Ten.Constrained
     - Data.Ten.Field
     - Data.Ten.Foldable
+    - Data.Ten.Fragment
     - Data.Ten.Functor
     - Data.Ten.Internal
     - Data.Ten.Representable

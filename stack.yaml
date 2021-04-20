@@ -17,6 +17,7 @@ resolver: lts-17.9
 packages:
 - ten
 - ten-lens
+- ten-unordered-containers
 
 extra-deps:
 - github: google/hs-portray

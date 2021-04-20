@@ -1,0 +1,44 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: ceb09ead19d146cb15b610e1fd2eec2fa352ba01dd64c71e56f9a6fc73fee89a
+
+name:           ten-unordered-containers
+version:        0.1.0.0
+synopsis:       A package providing one unordered container.
+description:    This provides unordered (hash-based) containers of kind `(k -> Type) -> Type`
+                based on unordered-containers.  Currently only HashMap10 is implemented.
+category:       Data
+homepage:       https://github.com/google/hs-ten#readme
+bug-reports:    https://github.com/google/hs-ten/issues
+author:         Andrew Pritchard <awpr@google.com>
+maintainer:     Andrew Pritchard <awpr@google.com>
+copyright:      2020-2021 Google LLC
+license:        Apache-2.0
+build-type:     Simple
+extra-source-files:
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/google/hs-ten
+  subdir: ten-unordered-containers
+
+library
+  exposed-modules:
+      Data.Ten.HashMap
+  other-modules:
+      Paths_ten_unordered_containers
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Werror
+  build-depends:
+      base
+    , hashable
+    , ten
+    , unordered-containers
+    , wrapped
+  default-language: Haskell2010

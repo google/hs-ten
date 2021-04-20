@@ -25,6 +25,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -50,13 +51,13 @@ import GHC.TypeLits (KnownSymbol, symbolVal)
 
 import Data.Distributive (Distributive(..))
 import Data.Functor.Rep (Representable(..), distributeRep, collectRep)
+import Data.Portray (Portray(..), Portrayal(..))
 import Data.Wrapped (Wrapped1(..))
-import Text.PrettyPrint.HughesPJ (text)
-import Text.PrettyPrint.HughesPJClass (Pretty(..))
 
 import {-# SOURCE #-} Data.Functor.Update (Update, equalityTable)
 import Data.Ten.Internal
          ( PathComponent(..), dropUnderscore, showsPath, starFst, starSnd
+         , portrayPath
          )
 
 -- | A 'Rep' type in the form of a parametric accessor function.
@@ -75,8 +76,8 @@ instance FieldPaths f => Show (Field f) where
   showsPrec p (Field f) = showParen (p > 10) $
     showString "Field " . showsPath 11 (coerce $ f fieldPaths)
 
-instance FieldPaths f => Pretty (Field f) where
-  pPrintPrec _ p f = text (showsPrec (round p) f "")
+instance FieldPaths f => Portray (Field f) where
+  portray (Field f) = Apply "Field" [portrayPath $ f fieldPaths]
 
 instance (Generic1 rec, GFieldPaths (Rep1 rec))
       => FieldPaths (Wrapped1 Generic1 rec) where

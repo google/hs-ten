@@ -44,18 +44,15 @@ extra-source-files:
 ghc-options: -Wall -Werror
 
 dependencies:
-  - adjunctions
-  - distributive # only for Data.Functor.Update
-  - base
-  - constraints
-  - data-default-class
-  - deepseq
-  - hashable
-  - portray >= 0.1
-  - portray-pretty >= 0.1
-  - pretty
-  - wrapped
-  - text # only for Field10
+  - adjunctions >= 4.0 && < 4.5
+  - distributive >= 0.1 && < 0.7
+  - base >= 4.12 && < 4.16
+  - data-default-class >= 0.0 && < 0.2
+  - deepseq >= 1.1 && < 1.5
+  - hashable >= 1.0 && < 1.4
+  - portray >= 0.1 && < 0.2
+  - wrapped >= 0.1 && < 0.2
+  - text >= 0.1 && < 1.3
 
 library:
   source-dirs: src

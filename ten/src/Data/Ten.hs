@@ -116,9 +116,7 @@ import Data.Kind (Type)
 import GHC.Generics
 
 import Data.Portray (Portray(..))
-import Data.Portray.Pretty (WrappedPortray(..))
 import Data.Wrapped (Wrapped(..))
-import Text.PrettyPrint.HughesPJClass (Pretty)
 
 import Data.Ten.Ap
 import Data.Ten.Applicative
@@ -146,7 +144,6 @@ import Data.Ten.Update
 -- | A 'Functor10' made by applying the argument to the first of two types.
 newtype Const10 (a :: k1) (b :: k2) (f :: k1 -> Type) = Const10 (f a)
   deriving newtype Portray
-  deriving Pretty via WrappedPortray (Const10 a b f)
 
 instance Functor10 (Const10 a b) where
   fmap10 f (Const10 x) = Const10 (f x)
@@ -164,7 +161,6 @@ instance cxt a => Constrained10 cxt (Const10 a b) where
 data Pair10 (a :: k) (b :: k) (f :: k -> Type) = Pair10 (f a) (f b)
   deriving (Generic, Eq, Show)
   deriving Portray via Wrapped Generic (Pair10 a b f)
-  deriving Pretty via WrappedPortray (Pair10 a b f)
 
 instance Functor10 (Pair10 a b) where
   fmap10 f (Pair10 x y) = Pair10 (f x) (f y)
@@ -200,7 +196,6 @@ instance Update10 (Pair10 a b) where
 data Maybe10 (a :: k) (f :: k -> Type) = Nothing10 | Just10 (f a)
   deriving Generic
   deriving Portray via Wrapped Generic (Maybe10 a f)
-  deriving Pretty via WrappedPortray (Maybe10 a f)
 
 instance Functor10 (Maybe10 a) where
   fmap10 _ Nothing10 = Nothing10
@@ -225,7 +220,6 @@ instance cxt a => Constrained10 cxt (Maybe10 a) where
 data Either10 (a :: k) (b :: k) (f :: k -> Type) = Left10 (f a) | Right10 (f b)
   deriving Generic
   deriving Portray via Wrapped Generic (Either10 a b f)
-  deriving Pretty via WrappedPortray (Either10 a b f)
 
 instance Functor10 (Either10 a b) where
   fmap10 f (Left10 x) = Left10 (f x)
@@ -261,7 +255,6 @@ instance (cxt a, cxt b) => Constrained10 cxt (Either10 a b) where
 newtype ConstF10 (a :: k1) (f :: k1 -> Type) (g :: k2 -> Type) = ConstF10 (f a)
   deriving Generic
   deriving Portray via Wrapped Generic (ConstF10 a f g)
-  deriving Pretty via WrappedPortray (ConstF10 a f g)
 
 instance Functor10 (ConstF10 a f) where
   fmap10 _ (ConstF10 x) = ConstF10 x
@@ -280,7 +273,6 @@ instance Constrained10 cxt (ConstF10 a f) where
 data PairF10 (a :: k) (f :: k -> Type) (g :: k -> Type) = PairF10 (f a) (g a)
   deriving Generic
   deriving Portray via Wrapped Generic (PairF10 a f g)
-  deriving Pretty via WrappedPortray (PairF10 a f g)
 
 instance Functor10 (PairF10 a f) where
   fmap10 f (PairF10 x y) = PairF10 x (f y)
@@ -301,7 +293,6 @@ data EitherF10 (a :: k) (f :: k -> Type) (g :: k -> Type)
   | RightF10 (g a)
   deriving Generic
   deriving Portray via Wrapped Generic (EitherF10 a f g)
-  deriving Pretty via WrappedPortray (EitherF10 a f g)
 
 instance Functor10 (EitherF10 a f) where
   fmap10 _ (LeftF10 x) = LeftF10 x
@@ -333,7 +324,6 @@ instance cxt a => Constrained10 cxt (EitherF10 a f) where
 data ProductF10 f g (m :: k -> Type) = ProductF10 (f m) (g m)
   deriving Generic
   deriving Portray via Wrapped Generic (ProductF10 f g m)
-  deriving Pretty via WrappedPortray (ProductF10 f g m)
 
 instance (Functor10 f, Functor10 g) => Functor10 (ProductF10 f g) where
   fmap10 f (ProductF10 x y) = ProductF10 (fmap10 f x) (fmap10 f y)
@@ -361,7 +351,6 @@ instance (Constrained10 cxt f, Constrained10 cxt g)
 data SumF10 f g (m :: k -> Type) = InLF10 (f m) | InRF10 (g m)
   deriving Generic
   deriving Portray via Wrapped Generic (SumF10 f g m)
-  deriving Pretty via WrappedPortray (SumF10 f g m)
 
 instance (Functor10 f, Functor10 g) => Functor10 (SumF10 f g) where
   fmap10 f (InLF10 x) = InLF10 (fmap10 f x)

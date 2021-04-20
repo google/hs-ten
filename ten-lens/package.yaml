@@ -32,10 +32,10 @@ extra-source-files:
 ghc-options: -Wall -Werror
 
 dependencies:
-  - base
-  - lens
-  - profunctors
-  - ten
+  - base >= 4.12 && < 4.16
+  - lens >= 1.5 && < 5.1
+  - profunctors >= 0.1 && < 5.7
+  - ten >= 0.1 && < 0.2
 
 library:
   source-dirs: src

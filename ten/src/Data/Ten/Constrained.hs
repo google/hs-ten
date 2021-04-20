@@ -51,9 +51,7 @@ import GHC.Generics
          )
 
 import Data.Portray (Portray(..))
-import Data.Portray.Pretty (WrappedPortray(..))
 import Data.Wrapped (Wrapped1(..))
-import Text.PrettyPrint.HughesPJClass (Pretty)
 
 import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..), liftA210, liftA310)
@@ -69,7 +67,6 @@ import Data.Ten.Traversable (Traversable10, traverse10)
 -- an @f m@.
 data Constrained (cxt :: k -> Constraint) (m :: k -> Type) (a :: k) where
   Constrained :: forall cxt m a. cxt a => m a -> Constrained cxt m a
-  deriving Pretty via WrappedPortray (Constrained cxt m a)
 
 instance Portray (m a) => Portray (Constrained cxt m a) where
   portray (Constrained x) = portray x

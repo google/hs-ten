@@ -23,6 +23,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -46,13 +47,14 @@ import GHC.Generics
          )
 import GHC.TypeLits (KnownSymbol, symbolVal)
 
+import Data.Portray (Portray(..), Portrayal(..))
 import Data.Wrapped (Wrapped1(..))
-import Text.PrettyPrint.HughesPJ (text)
-import Text.PrettyPrint.HughesPJClass (Pretty(..))
 
 import Data.Functor.Field (GFieldPaths(..))
 import Data.Ten.Ap (Ap10(..))
-import Data.Ten.Internal (PathComponent(..), dropUnderscore, showsPath)
+import Data.Ten.Internal
+         ( PathComponent(..), dropUnderscore, showsPath, portrayPath
+         )
 import {-# SOURCE #-} Data.Ten.Update (Update10, EqualityTable(..), equalityTable)
 
 -- | A 'Data.Ten.Representable.Rep10' type as a parametric accessor function.
@@ -62,15 +64,12 @@ instance Update10 f => TestEquality (Field10 f) where
   testEquality (Field10 f) (Field10 g) = case f equalityTable of
     EqualityTable tbl -> unComp1 (g tbl)
 
-instance FieldPaths10 rec => Show (Field10 rec a) where
+instance FieldPaths10 f => Show (Field10 f a) where
   showsPrec p (Field10 f) = showParen (p > 10) $
     showString "Field10 " . showsPath 11 (coerce $ f fieldPaths10)
 
-instance FieldPaths10 rec => Pretty (Field10 rec a) where
-  -- TODO(awpr): it'd be nice to make this configurable between lens-style and
-  -- Field10-constructor-and-function style, there's not really a good
-  -- configuration mechanism to use for it.
-  pPrintPrec _ p f = text (showsPrec (round p) f "")
+instance FieldPaths10 f => Portray (Field10 f a) where
+  portray (Field10 f) = Apply "Field10" [portrayPath $ coerce $ f fieldPaths10]
 
 -- | Provides a path of field selectors / lenses identifying each "field".
 class FieldPaths10 (rec :: (k -> Type) -> Type) where

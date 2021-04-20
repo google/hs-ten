@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4d894a72400c5fec374a86504961626027b4e3fb303fb08d38a6308e4ce9f831
+-- hash: ae3cb34d1333bd7fd3cb23db1fcbc0308e26870350da340ddcb8bd4c608d3730
 
 name:           ten-lens
 version:        0.1.0.0
@@ -36,8 +36,8 @@ library
       src
   ghc-options: -Wall -Werror
   build-depends:
-      base
-    , lens
-    , profunctors
-    , ten
+      base >=4.12 && <4.16
+    , lens >=1.5 && <5.1
+    , profunctors >=0.1 && <5.7
+    , ten >=0.1 && <0.2
   default-language: Haskell2010

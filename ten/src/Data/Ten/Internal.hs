@@ -14,6 +14,7 @@
 
 -- | Internal utilities used by multiple modules.
 
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -22,6 +23,8 @@ module Data.Ten.Internal where
 import Data.Text (Text)
 import qualified Data.Text as T
 import GHC.Generics ((:*:)(..))
+
+import Data.Portray (Portrayal(..), infixr_)
 
 -- | The names of a lens and field selector, or @coerce@/@_Wrapped@.
 --
@@ -52,6 +55,19 @@ showsPath p path = case reverse path of
   (x:xs) -> showParen (p > 9) $
     showPathComponent x .
     flip (foldr (\y -> showString " . " . showPathComponent y)) xs
+
+portrayPathComponent :: PathComponent -> Portrayal
+portrayPathComponent NewtypeIso = "coerce"
+portrayPathComponent (NamedField selectorName _) = Atom selectorName
+
+portrayPath :: [PathComponent] -> Portrayal
+portrayPath path = go $ reverse path
+ where
+  go [] = "coerce"
+  go [x] = portrayPathComponent x
+  go (x:xs) =
+    Binop "." (infixr_ 9) (portrayPathComponent x) $
+    go xs
 
 -- | Guess the name of the lens corresponding to a field.
 dropUnderscore :: String -> String

@@ -36,7 +36,7 @@ import Data.Maybe (fromMaybe)
 import Data.Type.Equality ((:~:)(..), TestEquality(..))
 import GHC.Generics (Generic1)
 
-import Data.Hashable (Hashable(..))
+import Data.Hashable (Hashable)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HM
 import Data.Wrapped (Wrapped1(..))

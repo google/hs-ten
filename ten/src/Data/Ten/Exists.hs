@@ -29,8 +29,6 @@ import Data.Type.Equality ((:~:)(..), TestEquality(..))
 
 import Data.Hashable (Hashable(..))
 import Data.Portray (Portray(..), Portrayal(..))
-import Data.Portray.Pretty (WrappedPortray(..))
-import Text.PrettyPrint.HughesPJClass (Pretty)
 
 import Data.Ten.Functor (Functor10(..))
 import Data.Ten.Foldable (Foldable10(..))
@@ -59,9 +57,6 @@ instance (forall a. Hashable (m a)) => Hashable (Exists m) where
 
 instance (forall a. Portray (m a)) => Portray (Exists m) where
   portray (Exists x) = Apply (Atom "Exists") [portray x]
-
-deriving via WrappedPortray (Exists m)
-  instance (forall a. Portray (m a)) => Pretty (Exists m)
 
 instance Functor10 Exists where
   fmap10 f (Exists x) = Exists (f x)

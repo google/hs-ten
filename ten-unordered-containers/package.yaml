@@ -32,11 +32,11 @@ extra-source-files:
 ghc-options: -Wall -Werror
 
 dependencies:
-  - base
-  - hashable
-  - ten
-  - unordered-containers
-  - wrapped
+  - base >= 4.12 && < 4.16
+  - hashable >= 1.0 && < 1.4
+  - ten >= 0.1 && < 0.2
+  - unordered-containers >= 0.1 && < 0.3
+  - wrapped >= 0.1 && < 0.2
 
 library:
   source-dirs: src

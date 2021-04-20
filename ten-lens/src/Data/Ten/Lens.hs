@@ -21,7 +21,7 @@
 
 module Data.Ten.Lens
          ( rep10, field10, ixRep10, ap10, comp
-         , (!=), (!=?), fragmented
+         , _Field10, _Field10', (!=), (!=?), fragmented
          ) where
 
 import Data.Functor.Contravariant (contramap)
@@ -77,7 +77,7 @@ _Field10 k = dimap toE fromE . right'
 
   fromE = either pure (fmap (k :=))
 
--- | '_Field10' taking the field lens rather than the 'Field10'.
+-- | '_Field10' taking the field lens rather than the 'Rep10'.
 _Field10'
   :: (TestEquality (Rep10 rec), Representable10 rec)
   => (forall n. Getting (Ap10 a n) (rec n) (Ap10 a n))

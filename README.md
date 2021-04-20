@@ -2,11 +2,17 @@
 
 A mirrored typeclass hierarchy of `Functor` etc. for `(k -> Type) -> Type`.
 
+## Disclaimer
+
+This is not an officially supported Google product.
+
+## Overview
+
 This gives equivalents of `Functor`, `Applicative`, `Foldable`, `Traversable`,
 and `Representable` for types whose parameter is a "wrapper" type constructor
 rather than just a concrete type.
 
-The naming convention @Functor10@ comes from the fact that it's a functor from
+The naming convention `Functor10` comes from the fact that it's a functor from
 the category of objects with one type parameter to the category of objects
 with zero type parameters.  See
 [http://hackage.haskell.org/package/hakaru-0.4.0/docs/src/Language.Hakaru.Syntax.IClasses.html](hakaru)

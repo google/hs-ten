@@ -12,7 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- | Typeclass hierarchy of functors from @k -> Type@ to @*@.
+-- | Typeclass hierarchy of functors from @k -> Type@ to @Type@.
 --
 -- The naming convention @XYZ10@ comes from the fact that it's a functor from
 -- the category of objects with one type parameter to the category of objects
@@ -102,11 +102,12 @@ module Data.Ten
 
     -- * Standard 'Functor10's
   , module Data.Ten.Ap
+  , module Data.Ten.Exists
   , module Data.Ten.Field
     -- ** Over types
   , Const10(..), Pair10(..), Maybe10(..), Either10(..)
     -- ** Over type constructors
-  , ConstF10(..), PairF10(..), EitherF10(..), Exists(..)
+  , ConstF10(..), PairF10(..), EitherF10(..)
     -- ** Over 'Functor10's
   , (:.:)(..), ProductF10(..), SumF10(..)
   ) where
@@ -114,7 +115,7 @@ module Data.Ten
 import Data.Kind (Type)
 import GHC.Generics
 
-import Data.Portray (Portray(..), Portrayal(..))
+import Data.Portray (Portray(..))
 import Data.Portray.Pretty (WrappedPortray(..))
 import Data.Wrapped (Wrapped(..))
 import Text.PrettyPrint.HughesPJClass (Pretty)
@@ -122,6 +123,7 @@ import Text.PrettyPrint.HughesPJClass (Pretty)
 import Data.Ten.Ap
 import Data.Ten.Applicative
 import Data.Ten.Constrained
+import Data.Ten.Exists
 import Data.Ten.Field
 import Data.Ten.Foldable
 import Data.Ten.Functor
@@ -377,25 +379,3 @@ instance (Constrained10 cxt f, Constrained10 cxt g)
     => Constrained10 cxt (SumF10 f g) where
   constrained10 (InLF10 x) = InLF10 (constrained10 x)
   constrained10 (InRF10 x) = InRF10 (constrained10 x)
-
-
--- | A 'Functor10' made by applying the argument to an existential type.
-data Exists (m :: k -> Type) where
-  Exists :: forall a m. m a -> Exists m
-
-deriving stock instance (forall a. Show (m a)) => Show (Exists m)
-
-instance (forall a. Portray (m a)) => Portray (Exists m) where
-  portray (Exists x) = Apply (Atom "Exists") [portray x]
-
-deriving via WrappedPortray (Exists m)
-  instance (forall a. Portray (m a)) => Pretty (Exists m)
-
-instance Functor10 Exists where
-  fmap10 f (Exists x) = Exists (f x)
-
-instance Foldable10 Exists where
-  foldMap10 f (Exists x) = f x
-
-instance Traversable10 Exists where
-  mapTraverse10 r f (Exists x) = r . Exists <$> f x

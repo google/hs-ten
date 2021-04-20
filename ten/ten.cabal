@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9e685a7befb0d9df32f6da71ad32b9eb854fcb9a8d732fc3af33c6d4ea63e1e5
+-- hash: 79d032da02af538f35ed44b97b84b06a3f86b49e2deaf64e2953405dc3fd8234
 
 name:           ten
 version:        0.1.0.0
@@ -46,6 +46,7 @@ library
       Data.Ten.Ap
       Data.Ten.Applicative
       Data.Ten.Constrained
+      Data.Ten.Exists
       Data.Ten.Field
       Data.Ten.Foldable
       Data.Ten.Fragment
@@ -66,6 +67,7 @@ library
     , data-default-class
     , deepseq
     , distributive
+    , hashable
     , portray >=0.1
     , portray-pretty >=0.1
     , pretty
@@ -89,6 +91,7 @@ test-suite Traversable10-test
     , data-default-class
     , deepseq
     , distributive
+    , hashable
     , portray >=0.1
     , portray-pretty >=0.1
     , pretty

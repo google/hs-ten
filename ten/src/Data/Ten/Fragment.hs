@@ -36,13 +36,12 @@ module Data.Ten.Fragment
          ) where
 
 import Data.Functor.Contravariant (Contravariant(..))
-import Data.Proxy (Proxy(..))
 import Data.Type.Equality ((:~:)(Refl), TestEquality(..))
 
 import Control.DeepSeq (NFData(..))
 import Data.Portray (Portray(..), Portrayal(..), Infixity(..), Assoc(..))
 
-import Data.Ten.Constrained (Constrained(..), Constrained10(..), pure10C)
+import Data.Ten.Entails (Entails, withEntailment)
 import Data.Ten.Representable (Representable10(..))
 import Data.Ten.Update (Update10, overRep10)
 
@@ -54,29 +53,21 @@ infixr 5 :=
 -- the @m a@ provides its value.
 data Fragment rec m = forall a. Rep10 rec a := m a
 
-withRepC
-  :: forall c rec a r
-   . (Representable10 rec, Constrained10 c rec)
-  => Rep10 rec a -> (c a => r) -> r
-withRepC k r = case d of Constrained _ -> r
- where
-  d = pure10C @c @rec @(Constrained c Proxy) (Constrained Proxy) `index10` k
-
 instance ( k ~ Rep10 rec, forall a. NFData (k a)
          , forall a. NFData a => NFData (m a)
-         , Representable10 rec, Constrained10 NFData rec
+         , Representable10 rec, Entails (Rep10 rec) NFData
          )
       => NFData (Fragment rec m) where
-  rnf (k := m) = withRepC @NFData @rec k $ rnf k `seq` rnf m
+  rnf (k := m) = withEntailment @NFData k $ rnf k `seq` rnf m
 
 instance ( k ~ Rep10 rec, TestEquality k
-         , Representable10 rec, Constrained10 Eq rec
+         , Representable10 rec, Entails (Rep10 rec) Eq
          , forall a. Eq a => Eq (m a)
          )
       => Eq (Fragment rec m) where
   (kl := ml) == (kr := mr) = case testEquality kl kr of
      Nothing -> False
-     Just Refl -> withRepC @Eq @rec kl $ ml == mr
+     Just Refl -> withEntailment @Eq kl $ ml == mr
 
 portrayFrag :: Portrayal -> Portrayal -> Portrayal
 portrayFrag = Binop ":=" (Infixity AssocR 5)
@@ -97,7 +88,7 @@ instance ( k ~ Rep10 rec
 instance ( k ~ Rep10 rec
          , forall a. Show (k a)
          , forall a. Show a => Show (m a)
-         , Representable10 rec, Constrained10 Show rec
+         , Representable10 rec, Entails (Rep10 rec) Show
          )
       => Show (Fragment rec m) where
   -- We have to write this by hand because the derived version doesn't know how
@@ -106,17 +97,17 @@ instance ( k ~ Rep10 rec
   showsPrec p (ka := ma) = showParen (p > prec) $
     showsPrec (1+prec) ka .
     showString " := " .
-    withRepC @Show @rec ka (showsPrec (1+prec) ma)
+    withEntailment @Show ka (showsPrec (1+prec) ma)
    where
     prec = 5
 
 instance ( k ~ Rep10 rec
          , forall a. Portray (k a)
          , forall a. Portray a => Portray (m a)
-         , Representable10 rec, Constrained10 Portray rec
+         , Representable10 rec, Entails (Rep10 rec) Portray
          )
       => Portray (Fragment rec m) where
-  portray (ka := ma) = withRepC @Portray @rec ka $
+  portray (ka := ma) = withEntailment @Portray ka $
     portrayFrag (portray ka) (portray ma)
 
 -- | Check if two 'Fragment's have the same key.

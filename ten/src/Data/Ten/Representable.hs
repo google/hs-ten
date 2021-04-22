@@ -54,7 +54,7 @@ import Data.Wrapped (Wrapped1(..))
 import Data.Functor.Rep (Representable(..))
 import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..))
-import Data.Ten.Constrained (Constrained10(..), withConstrained)
+import Data.Ten.Entails (Entails(..), withEntailment)
 import Data.Ten.Field (Field10(..))
 import Data.Ten.Functor (Functor10(..))
 import Data.Ten.Functor.WithIndex (Index10, Functor10WithIndex(..))
@@ -190,7 +190,7 @@ instance (Generic1 rec, Applicative10 (Rep1 rec), GTabulate10 (Rep1 rec))
 
 -- | Access an element along with an instance for its type parameter.
 index10C
-  :: forall cxt f a r m
-   . (Representable10 f, Constrained10 cxt f)
-  => f m -> Rep10 f a -> (cxt a => m a -> r) -> r
-index10C fm k f = withConstrained @cxt f $ index10 (constrained10 @_ @cxt fm) k
+  :: forall c f a r m
+   . (Representable10 f, Entails (Rep10 f) c)
+  => f m -> Rep10 f a -> (c a => m a -> r) -> r
+index10C fm k f = withEntailment @c k $ f (index10 fm k)

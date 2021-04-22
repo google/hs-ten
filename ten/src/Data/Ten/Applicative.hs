@@ -14,12 +14,16 @@
 
 -- | Provides an analog of 'Applicative' over arity-1 type constructors.
 
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -27,9 +31,11 @@ module Data.Ten.Applicative
          ( Applicative10(..), (<*!), (*>!)
          , liftA310
          , (:->:)(Arr10, runArr10)
+         , pure10C, liftA210C, liftA310C
          ) where
 
 import Control.Applicative (liftA2)
+import Data.Proxy (Proxy(..))
 import GHC.Generics
          ( Generic1(..)
          , (:.:)(..), (:*:)(..)
@@ -39,7 +45,9 @@ import GHC.Generics
 import Data.Wrapped (Wrapped1(..))
 
 import Data.Ten.Ap (Ap10(..))
+import Data.Ten.Entails (Entails)
 import Data.Ten.Functor (Functor10, (<$>!))
+import Data.Ten.Functor.WithIndex (Index10, Functor10WithIndex, fmap10C)
 
 infixl 4 <*>!
 -- | 'Applicative' over arity-1 type constructors.
@@ -111,4 +119,25 @@ infixl 4 *>!
 (*>!) :: Applicative10 f => f m -> f n -> f n
 (*>!) = liftA210 (const id)
 
+-- | 'pure10' with access to an instance for every element.
+pure10C
+  :: forall c f m
+   . (Entails (Index10 f) c, Applicative10 f, Functor10WithIndex f)
+  => (forall a. c a => m a) -> f m
+pure10C x = fmap10C @c (const x) (pure10 Proxy)
 
+-- | 'liftA210' with access to an instance for every element.
+liftA210C
+  :: forall c f m n o
+   . (Entails (Index10 f) c, Applicative10 f, Functor10WithIndex f)
+  => (forall a. c a => m a -> n a -> o a)
+  -> f m -> f n -> f o
+liftA210C f x y = fmap10C @c (Arr10 . f) x <*>! y
+
+-- | 'liftA310' with access to an instance for every element.
+liftA310C
+  :: forall c f m n o p
+   . (Entails (Index10 f) c, Applicative10 f, Functor10WithIndex f)
+  => (forall a. c a => m a -> n a -> o a -> p a)
+  -> f m -> f n -> f o -> f p
+liftA310C f x y z = liftA210C @c (fmap Arr10 . f) x y <*>! z

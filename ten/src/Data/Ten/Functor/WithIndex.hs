@@ -12,16 +12,25 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Data.Ten.Functor.WithIndex (Index10, Functor10WithIndex(..)) where
+module Data.Ten.Functor.WithIndex
+         ( Index10
+         , Functor10WithIndex(..), fmap10C
+         ) where
 
 import GHC.Generics ((:.:)(..))
 
+import Data.Ten.Entails (Entails, byEntailment)
 import Data.Ten.Functor (Functor10(..))
 
 type family Index10 (f :: (k -> *) -> *) :: k -> *
@@ -33,3 +42,10 @@ class Functor10 f => Functor10WithIndex f where
 
 instance (Functor g, Functor10WithIndex f) => Functor10WithIndex (g :.: f) where
   imap10 f (Comp1 gfm) = Comp1 $ fmap (imap10 f) gfm
+
+-- | 'fmap10' with access to an instance for every element.
+fmap10C
+  :: forall c f m n
+   . (Entails (Index10 f) c, Functor10WithIndex f)
+  => (forall a. c a => m a -> n a) -> f m -> f n
+fmap10C f = imap10 (byEntailment @c f)

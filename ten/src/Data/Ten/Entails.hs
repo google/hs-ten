@@ -27,7 +27,10 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
-module Data.Ten.Entails (Entails(..), Dict1(..), (:!:), withEntailment) where
+module Data.Ten.Entails
+         ( Entails(..), Dict1(..), (:!:)
+         , withEntailment, byEntailment
+         ) where
 
 import Data.Kind (Constraint)
 import Data.Proxy (Proxy(..))
@@ -71,3 +74,10 @@ instance c (d a) => (c :!: d) a
 -- @
 withEntailment :: forall c k a r. Entails k c => k a -> (c a => r) -> r
 withEntailment k r = case entailment @_ @c k of Dict1 -> r
+
+-- | @flip 'withEntailment'@.
+--
+-- This is useful for "consuming" an index off the front of a function type and
+-- turning it into an instance, e.g. in the context of an 'imap10' call.
+byEntailment :: forall c k a r. Entails k c => (c a => r) -> k a -> r
+byEntailment r k = withEntailment @c k r

@@ -12,15 +12,23 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Data.Ten.Traversable.WithIndex
          ( Index10, Traversable10WithIndex(..), itraverse10
+         , traverse10C
          ) where
 
 import GHC.Generics ((:.:)(..))
 
+import Data.Ten.Entails (Entails(..), byEntailment)
 import Data.Ten.Foldable.WithIndex (Foldable10WithIndex(..))
 import Data.Ten.Functor.WithIndex (Index10, Functor10WithIndex(..))
 import Data.Ten.Traversable (Traversable10(..))
@@ -44,3 +52,10 @@ itraverse10
   => (forall a. Index10 f a -> m a -> g (n a))
   -> f m -> g (f n)
 itraverse10 = imapTraverse10 id
+
+-- | 'traverse10' with access to an instance for every element.
+traverse10C
+  :: forall c f g m n
+   . (Entails (Index10 f) c, Applicative g, Traversable10WithIndex f)
+  => (forall a. c a => m a -> g (n a)) -> f m -> g (f n)
+traverse10C f = itraverse10 (byEntailment @c f)

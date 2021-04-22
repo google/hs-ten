@@ -78,23 +78,27 @@ module Data.Ten
   ( -- * Typeclasses
     -- ** Functor10
     module Data.Ten.Functor
+  , module Data.Ten.Functor.WithIndex
     -- ** Foldable10
   , module Data.Ten.Foldable
+  , module Data.Ten.Foldable.WithIndex
     -- ** Traversable10
   , module Data.Ten.Traversable
+  , module Data.Ten.Traversable.WithIndex
     -- ** Applicative10
   , module Data.Ten.Applicative
-    -- ** Constrained10
-  , module Data.Ten.Constrained
     -- ** Representable10
   , module Data.Ten.Representable
     -- ** Update10
   , module Data.Ten.Update
+    -- ** Entails
+  , module Data.Ten.Entails
 
     -- * Standard 'Functor10's
   , module Data.Ten.Ap
   , module Data.Ten.Exists
   , module Data.Ten.Field
+  , module Data.Ten.Fragment
   , (:.:)(..), (:*:)(..), (:+:)(..)
   ) where
 
@@ -102,13 +106,17 @@ import GHC.Generics ((:.:)(..), (:*:)(..), (:+:)(..))
 
 import Data.Ten.Ap
 import Data.Ten.Applicative
-import Data.Ten.Constrained
+import Data.Ten.Entails
 import Data.Ten.Exists
 import Data.Ten.Field
 import Data.Ten.Foldable
+import Data.Ten.Foldable.WithIndex
+import Data.Ten.Fragment
 import Data.Ten.Functor
+import Data.Ten.Functor.WithIndex
 import Data.Ten.Representable
 import Data.Ten.Traversable
+import Data.Ten.Traversable.WithIndex
 import Data.Ten.Update
 
 -- TODO(awpr):

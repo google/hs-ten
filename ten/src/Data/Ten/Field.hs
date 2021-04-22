@@ -19,25 +19,32 @@
 -- @f@.  This leads to instances for 'Data.Ten.Representable.Representable10'
 -- and 'Data.Ten.Update.Update10'.
 
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Ten.Field (Field10(..), FieldPaths10(..), GFieldPaths10(..)) where
+module Data.Ten.Field
+         ( Field10(..)
+         , FieldPaths10(..), GFieldPaths10(..)
+         , Constrained10(..)
+         ) where
 
 import Control.Monad.Trans.State (state, evalState)
 import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
-import Data.Kind (Type)
+import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy(..))
 import qualified Data.Text as T
 import Data.Type.Equality (TestEquality(..))
@@ -56,7 +63,6 @@ import Data.Wrapped (Wrapped1(..))
 import Data.Functor.Field (GFieldPaths(..))
 import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..))
-import Data.Ten.Constrained (Constrained10(..), pure10C)
 import Data.Ten.Entails (Entails(..), Dict1(..))
 import Data.Ten.Internal
          ( PathComponent(..), dropUnderscore, showsPath, portrayPath
@@ -91,9 +97,6 @@ instance FieldPaths10 f => Show (Field10 f a) where
 
 instance FieldPaths10 f => Portray (Field10 f a) where
   portray (Field10 f) = Apply "Field10" [portrayPath $ coerce $ f fieldPaths10]
-
-instance (Constrained10 c f, Applicative10 f) => Entails (Field10 f) c where
-  entailment (Field10 f) = f (pure10C @c Dict1)
 
 -- | Provides a path of field selectors / lenses identifying each "field".
 class FieldPaths10 (rec :: (k -> Type) -> Type) where
@@ -154,3 +157,32 @@ instance (GFieldPaths f, GFieldPaths10 g) => GFieldPaths10 (f :.: g) where
     gfieldPaths10 $ \inner ->
     r $ outer ++ inner
   {-# INLINE gfieldPaths10 #-}
+
+-- | @Constrained10 c f@ means that in @f m@, all applications of @m@
+-- are to types @x@ that satisfy constraint @c@.
+class Constrained10 (c :: k -> Constraint) (f :: (k -> Type) -> Type) where
+  -- | Recover instances of @c@ to accompany each @m@ element in @f@.
+  constrained10 :: f (Dict1 c)
+
+instance c a => Constrained10 c (Ap10 a) where
+  constrained10 = Ap10 Dict1
+
+instance (Generic1 f, Constrained10 c (Rep1 f))
+      => Constrained10 c (Wrapped1 Generic1 f) where
+  constrained10 = Wrapped1 $ to1 constrained10
+
+instance Constrained10 c U1 where
+  constrained10 = U1
+
+deriving instance Constrained10 c f => Constrained10 c (Rec1 f)
+deriving instance Constrained10 c f => Constrained10 c (M1 i c1 f)
+
+instance (Constrained10 c f, Constrained10 c g)
+      => Constrained10 c (f :*: g) where
+  constrained10 = constrained10 :*: constrained10
+
+instance (Applicative f, Constrained10 c g) => Constrained10 c (f :.: g) where
+  constrained10 = Comp1 (pure constrained10)
+
+instance (Constrained10 c f, Applicative10 f) => Entails (Field10 f) c where
+  entailment (Field10 f) = f constrained10

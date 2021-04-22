@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | An extension of 'Functor10' that provides access to some 'Index10'.
+
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -33,10 +35,15 @@ import GHC.Generics ((:.:)(..))
 import Data.Ten.Entails (Entails, byEntailment)
 import Data.Ten.Functor (Functor10(..))
 
+-- | The index type associated with a given @f@.
+--
+-- This is often a GADT-like type, in that inspecting @Index10 f a@ can refine
+-- @a@ to some more concrete type, provide instances for it via 'Entails', etc.
 type family Index10 (f :: (k -> *) -> *) :: k -> *
 
 type instance Index10 (g :.: f) = Index10 f
 
+-- | An extension of 'Functor10' that provides access to some 'Index10'.
 class Functor10 f => Functor10WithIndex f where
   imap10 :: (forall a. Index10 f a -> m a -> n a) -> f m -> f n
 

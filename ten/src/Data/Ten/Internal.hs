@@ -56,10 +56,12 @@ showsPath p path = case reverse path of
     showPathComponent x .
     flip (foldr (\y -> showString " . " . showPathComponent y)) xs
 
+-- | Pretty-print a 'PathComponent'.
 portrayPathComponent :: PathComponent -> Portrayal
 portrayPathComponent NewtypeIso = "coerce"
 portrayPathComponent (NamedField selectorName _) = Atom selectorName
 
+-- | Pretty-print a field path.
 portrayPath :: [PathComponent] -> Portrayal
 portrayPath path = go $ reverse path
  where

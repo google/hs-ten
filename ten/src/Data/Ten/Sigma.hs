@@ -183,7 +183,7 @@ caseFragment fco (k :** v) = getOpCostar (fco `index10` k) v
 --       , _mr1B = _mr2A
 --       }
 --
--- It looks weird that the argument converts from 'recB' to 'recA' in order
+-- It looks weird that the argument converts from @recB@ to @recA@ in order
 -- to convert (':**') the other way, so it merits some explanation: first,
 -- note that, by @'Representable10' recA@, we know that @recA m@ is
 -- isomorphic to @forall a. 'Rep10' recA a -> m a@.  That is, @Rep10 recA@
@@ -206,8 +206,9 @@ caseFragment fco (k :** v) = getOpCostar (fco `index10` k) v
 -- with a conversion inserted at the front), and apply it to the payload.
 --
 -- Usage will typically involve applying contramap to some number of fields and
--- leaving the rest unchanged.  If you have a type-changing 'Setter' at hand,
--- it's probably easier to use 'fragmented'.
+-- leaving the rest unchanged.  If you have a type-changing
+-- 'Control.Lens.Setter' at hand, it's probably easier to use
+-- 'Data.Ten.Lens.fragmented'.
 lmapFragment
   :: forall recA recB m f
    . ( Representable10 recA, Representable10 recB

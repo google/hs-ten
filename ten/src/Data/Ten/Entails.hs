@@ -27,6 +27,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
+-- | A typeclass of GADT-like types whose existence implies an instance.
+
 module Data.Ten.Entails
          ( Entails(..), Dict1(..), (:!:)
          , withEntailment, byEntailment
@@ -39,6 +41,8 @@ import Type.Reflection (TypeRep)
 
 -- We could just use Dict from "constraints", but it'd be a dependency that we
 -- don't really need to have.
+
+-- | A dictionary for the given arity-1 constraint constructor ("a class").
 data Dict1 (c :: k -> Constraint) a = c a => Dict1
 
 -- | A typeclass of GADT-like types whose existence implies an instance.
@@ -78,6 +82,7 @@ withEntailment k r = case entailment @_ @c k of Dict1 -> r
 -- | @flip 'withEntailment'@.
 --
 -- This is useful for "consuming" an index off the front of a function type and
--- turning it into an instance, e.g. in the context of an 'imap10' call.
+-- turning it into an instance, e.g. in the context of an
+-- 'Data.Ten.Functor.WithIndex.imap10' call.
 byEntailment :: forall c k a r. Entails k c => (c a => r) -> k a -> r
 byEntailment r k = withEntailment @c k r

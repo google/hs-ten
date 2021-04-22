@@ -78,7 +78,7 @@ instance (Traversable f, Applicative f) => Hashable (Field f) where
 
 -- | Build a record where each field has a description of the field's location.
 --
--- This primarily powers the 'Show' and 'Pretty' instances of 'Field'.
+-- This primarily powers the 'Show' and 'Portray' instances of 'Field'.
 class FieldPaths f where
   fieldPaths :: f [PathComponent]
 
@@ -156,7 +156,8 @@ class GTabulate rec where
 
 -- | A newtype carrying instances for use with @DerivingVia@.
 --
--- This provides 'Applicative', 'Monad', 'Representable', and 'Update'.
+-- This provides 'Applicative', 'Monad', 'Representable', and
+-- 'Data.Functor.Update.Update'.
 newtype FieldRep f a = FieldRep (f a)
   deriving Functor
 

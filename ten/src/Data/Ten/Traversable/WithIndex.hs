@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | An extension of 'Traversable10' that provides access to some 'Index10'.
+
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -33,6 +35,7 @@ import Data.Ten.Foldable.WithIndex (Foldable10WithIndex(..))
 import Data.Ten.Functor.WithIndex (Index10, Functor10WithIndex(..))
 import Data.Ten.Traversable (Traversable10(..))
 
+-- | An extension of 'Traversable10' that provides access to some 'Index10'.
 class (Functor10WithIndex f, Foldable10WithIndex f, Traversable10 f)
    => Traversable10WithIndex f where
   imapTraverse10
@@ -53,7 +56,7 @@ itraverse10
   -> f m -> g (f n)
 itraverse10 = imapTraverse10 id
 
--- | 'traverse10' with access to an instance for every element.
+-- | 'Data.Ten.Traversable.traverse10' with an instance for every element.
 traverse10C
   :: forall c f g m n
    . (Entails (Index10 f) c, Applicative g, Traversable10WithIndex f)

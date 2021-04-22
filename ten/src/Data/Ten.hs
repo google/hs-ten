@@ -40,14 +40,14 @@
 -- The provided GHC.Generics-based deriving functionality is meant to be used
 -- with the DerivingVia extension.  To get the full suite of classes on a
 -- generic-record type, make sure every field is either an 'Ap10', another
--- nested generic-record, or an instance of 'Update' applied to one of the
--- above.  Then, just add the deriving clauses:
+-- nested generic-record, or an instance of 'Data.Functor.Update' applied to
+-- one of the above.  Then, just add the deriving clauses:
 --
--- data MyType = MyType { ... }
+-- data MyType f = MyType { ... }
 --   deriving Generic1
 --   deriving
 --     ( Functor10, Foldable10, Traversable10
---     , Applicative10, Constrained10 cxt
+--     , Applicative10, Constrained10 c
 --     ) via Wrapped1 Generic1 MyType
 
 {-# LANGUAGE AllowAmbiguousTypes #-}

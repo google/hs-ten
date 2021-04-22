@@ -29,8 +29,6 @@ github: google/hs-ten/ten-unordered-containers
 extra-source-files:
   CHANGELOG.md
 
-ghc-options: -Wall -Werror
-
 dependencies:
   - base >= 4.12 && < 4.16
   - hashable >= 1.0 && < 1.4

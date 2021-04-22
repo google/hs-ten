@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ae3cb34d1333bd7fd3cb23db1fcbc0308e26870350da340ddcb8bd4c608d3730
+-- hash: 1da0c873bfa6d1280ca5650087eade27f707beb5ec9483a5cfe9ef8943e14154
 
 name:           ten-lens
 version:        0.1.0.0
@@ -34,7 +34,6 @@ library
       Paths_ten_lens
   hs-source-dirs:
       src
-  ghc-options: -Wall -Werror
   build-depends:
       base >=4.12 && <4.16
     , lens >=1.5 && <5.1

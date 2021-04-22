@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1af8e9d3cf5f59f87db76eab78add6c9ef6ea00852d9df4c678b2c1782460cb7
+-- hash: 5ba4dbf10f9902e7cdd647642fa5307ba23739f175749a086b2f99b613565391
 
 name:           ten
 version:        0.1.0.0
@@ -62,7 +62,6 @@ library
       Paths_ten
   hs-source-dirs:
       src
-  ghc-options: -Wall -Werror
   build-depends:
       adjunctions >=4.0 && <4.5
     , base >=4.12 && <4.16
@@ -83,7 +82,6 @@ test-suite Traversable10-test
       Paths_ten
   hs-source-dirs:
       test
-  ghc-options: -Wall -Werror
   build-depends:
       HUnit
     , adjunctions >=4.0 && <4.5

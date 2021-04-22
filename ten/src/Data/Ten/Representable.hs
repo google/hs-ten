@@ -35,6 +35,7 @@ module Data.Ten.Representable
          , rep10', field10'
          , distributeRep10, collectRep10
          , GTabulate10(..)
+         , index10C
          ) where
 
 import Data.Coerce (coerce)
@@ -53,6 +54,7 @@ import Data.Wrapped (Wrapped1(..))
 import Data.Functor.Rep (Representable(..))
 import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..))
+import Data.Ten.Constrained (Constrained10(..), withConstrained)
 import Data.Ten.Field (Field10(..))
 import Data.Ten.Foldable (Foldable10(..), fold10)
 import Data.Ten.Internal (starFst, starSnd)
@@ -191,3 +193,10 @@ instance (Generic1 rec, Applicative10 (Rep1 rec), GTabulate10 (Rep1 rec))
   index10 (Wrapped1 rec) (Field10 f) = f rec
   tabulate10 f =
     Wrapped1 $ to1 $ gtabulate10 $ \i -> f $ Field10 $ getField10 i . from1
+
+-- | Access an element along with an instance for its type parameter.
+index10C
+  :: forall cxt f a r m
+   . (Representable10 f, Constrained10 cxt f)
+  => f m -> Rep10 f a -> (cxt a => m a -> r) -> r
+index10C fm k f = withConstrained @cxt f $ index10 (constrained10 @_ @cxt fm) k

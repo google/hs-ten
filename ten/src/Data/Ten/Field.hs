@@ -23,6 +23,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
@@ -33,6 +34,7 @@
 
 module Data.Ten.Field (Field10(..), FieldPaths10(..), GFieldPaths10(..)) where
 
+import Control.Monad.Trans.State (state, evalState)
 import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
 import Data.Kind (Type)
@@ -47,14 +49,17 @@ import GHC.Generics
          )
 import GHC.TypeLits (KnownSymbol, symbolVal)
 
+import Data.Hashable (Hashable(..))
 import Data.Portray (Portray(..), Portrayal(..))
 import Data.Wrapped (Wrapped1(..))
 
 import Data.Functor.Field (GFieldPaths(..))
 import Data.Ten.Ap (Ap10(..))
+import Data.Ten.Applicative (Applicative10(..))
 import Data.Ten.Internal
          ( PathComponent(..), dropUnderscore, showsPath, portrayPath
          )
+import Data.Ten.Traversable (Traversable10, fsequenceA10)
 import {-# SOURCE #-} Data.Ten.Update (Update10, EqualityTable(..), equalityTable)
 
 -- | A 'Data.Ten.Representable.Rep10' type as a parametric accessor function.
@@ -63,6 +68,20 @@ newtype Field10 f a = Field10 { getField10 :: forall m. f m -> m a }
 instance Update10 f => TestEquality (Field10 f) where
   testEquality (Field10 f) (Field10 g) = case f equalityTable of
     EqualityTable tbl -> unComp1 (g tbl)
+
+fieldNumbers :: (Traversable10 f, Applicative10 f) => f (Const Int)
+fieldNumbers =
+  flip evalState 0 $
+  fsequenceA10 (pure10 $ Comp1 $ state $ \i -> (Const i, i + 1))
+
+instance (Traversable10 f, Applicative10 f) => Eq (Field10 f a) where
+  Field10 x == Field10 y = x fieldNumbers == y fieldNumbers
+
+instance (Traversable10 f, Applicative10 f) => Ord (Field10 f a) where
+  Field10 x `compare` Field10 y = x fieldNumbers `compare` y fieldNumbers
+
+instance (Traversable10 f, Applicative10 f) => Hashable (Field10 f a) where
+  hashWithSalt salt (Field10 x) = hashWithSalt salt $ x fieldNumbers
 
 instance FieldPaths10 f => Show (Field10 f a) where
   showsPrec p (Field10 f) = showParen (p > 10) $

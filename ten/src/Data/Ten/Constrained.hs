@@ -39,7 +39,6 @@ module Data.Ten.Constrained
          , foldMap10C, foldr10C, foldl10C, traverse10C_
          , traverse10C
          , pure10C, liftA210C, liftA310C
-         , index10C
          ) where
 
 import Data.Kind (Constraint, Type)
@@ -57,7 +56,6 @@ import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..), liftA210, liftA310)
 import Data.Ten.Foldable (Foldable10, foldl10, foldr10, foldMap10, traverse10_)
 import Data.Ten.Functor (Functor10(..))
-import Data.Ten.Representable (Representable10(..))
 import Data.Ten.Traversable (Traversable10, traverse10)
 
 -- | Product of a constraint constructor and type constructor.
@@ -198,11 +196,3 @@ liftA310C
   => (forall a. cxt a => m a -> n a -> o a -> p a)
   -> f m -> f n -> f o -> f p
 liftA310C f = liftA310 (withConstrained @cxt f) . constrained10
-
--- | Access an element along with an instance for its type parameter.
-index10C
-  :: forall cxt f a r m
-   . (Representable10 f, Constrained10 cxt f)
-  => f m -> Rep10 f a -> (cxt a => m a -> r) -> r
-index10C fm k f = withConstrained @cxt f $ index10 (constrained10 @_ @cxt fm) k
-

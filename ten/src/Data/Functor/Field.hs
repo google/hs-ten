@@ -38,6 +38,7 @@ module Data.Functor.Field
          , FieldRep(..), FieldPaths(..), GFieldPaths(..), GTabulate(..)
          ) where
 
+import Control.Monad.Trans.State (state, evalState)
 import Data.Coerce (coerce)
 import Data.Proxy (Proxy(..))
 import qualified Data.Text as T
@@ -50,11 +51,11 @@ import GHC.Generics
 import GHC.TypeLits (KnownSymbol, symbolVal)
 
 import Data.Distributive (Distributive(..))
+import Data.Hashable (Hashable(..))
 import Data.Functor.Rep (Representable(..), distributeRep, collectRep)
 import Data.Portray (Portray(..), Portrayal(..))
 import Data.Wrapped (Wrapped1(..))
 
-import {-# SOURCE #-} Data.Functor.Update (Update, equalityTable)
 import Data.Ten.Internal
          ( PathComponent(..), dropUnderscore, showsPath, starFst, starSnd
          , portrayPath
@@ -63,8 +64,17 @@ import Data.Ten.Internal
 -- | A 'Rep' type in the form of a parametric accessor function.
 newtype Field f = Field { getField :: forall a. f a -> a }
 
-instance Update f => Eq (Field f) where
-  Field f == Field g = g (f equalityTable)
+fieldNumbers :: (Traversable f, Applicative f) => f Int
+fieldNumbers = flip evalState 0 $ sequenceA $ pure $ state $ \i -> (i, i + 1)
+
+instance (Traversable f, Applicative f) => Eq (Field f) where
+  Field f == Field g = f fieldNumbers == g fieldNumbers
+
+instance (Traversable f, Applicative f) => Ord (Field f) where
+  Field f `compare` Field g = f fieldNumbers `compare` g fieldNumbers
+
+instance (Traversable f, Applicative f) => Hashable (Field f) where
+  hashWithSalt salt (Field f) = hashWithSalt salt $ f fieldNumbers
 
 -- | Build a record where each field has a description of the field's location.
 --

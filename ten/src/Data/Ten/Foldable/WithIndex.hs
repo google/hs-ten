@@ -59,7 +59,7 @@ ifoldr10 f z fm = flip appEndo z $ getDual $
 -- | 'Data.Ten.Foldable.traverse10_' with an index parameter.
 itraverse10_
   :: (Foldable10WithIndex f, Applicative g)
-  => (forall a. Index10 f a -> m a -> g (n a))
+  => (forall a. Index10 f a -> m a -> g ())
   -> f m -> g ()
 itraverse10_ f = ifoldl10 (\i a x -> a <* f i x) (pure ())
 
@@ -86,7 +86,7 @@ foldl10C f = ifoldl10 (byEntailment @c f)
 
 -- | 'traverse10_' with access to an instance for every element.
 traverse10C_
-  :: forall c f g m n
+  :: forall c f g m
    . (Entails (Index10 f) c, Applicative g, Foldable10WithIndex f)
-  => (forall a. c a => m a -> g (n a)) -> f m -> g ()
-traverse10C_ f = itraverse10_ @_ @_ @_ @n (byEntailment @c f)
+  => (forall a. c a => m a -> g ()) -> f m -> g ()
+traverse10C_ f = itraverse10_ (byEntailment @c f)

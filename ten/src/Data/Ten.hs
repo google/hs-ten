@@ -98,7 +98,7 @@ module Data.Ten
   , module Data.Ten.Ap
   , module Data.Ten.Exists
   , module Data.Ten.Field
-  , module Data.Ten.Fragment
+  , module Data.Ten.Sigma
   , (:.:)(..), (:*:)(..), (:+:)(..)
   ) where
 
@@ -111,7 +111,7 @@ import Data.Ten.Exists
 import Data.Ten.Field
 import Data.Ten.Foldable
 import Data.Ten.Foldable.WithIndex
-import Data.Ten.Fragment
+import Data.Ten.Sigma
 import Data.Ten.Functor
 import Data.Ten.Functor.WithIndex
 import Data.Ten.Representable

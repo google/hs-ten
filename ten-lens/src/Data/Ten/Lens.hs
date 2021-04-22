@@ -14,9 +14,12 @@
 
 -- | Provides lenses and related functionality for the "ten" package.
 
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Data.Ten.Lens
@@ -32,7 +35,7 @@ import Control.Lens.Setter ((%~), Setter, ASetter, setting)
 import Data.Profunctor (dimap, right')
 
 import Data.Ten.Ap (Ap10(..))
-import Data.Ten.Fragment (Fragment(..), OpFragment, lmapFragment)
+import Data.Ten.Sigma ((:**)(..), OpCostar, lmapFragment)
 import Data.Ten.Representable (Representable10(..), rep10', field10')
 import Data.Ten.Update (ixRep10)
 import Data.Ten ((:.:)(..))
@@ -61,31 +64,32 @@ ap10 = iso unAp10 Ap10
 comp :: Iso ((m :.: n) a) ((k :.: l) b) (m (n a)) (k (l b))
 comp = iso unComp1 Comp1
 
--- | A 'Prism' from a Fragment to a particular field.
+-- | A 'Prism' from a ':**" to a particular field.
 --
 --     _Field10 k f (k := m) === (k :=) <$> f m
 --     _Field10 k' f (k := m) === k := m | k' /= k
 --     _Field10 k # m === k := m
 _Field10
-  :: TestEquality (Rep10 rec)
-  => Rep10 rec a -> Prism' (Fragment rec m) (m a)
+  :: TestEquality k
+  => k a -> Prism' (k :** m) (m a)
 _Field10 k = dimap toE fromE . right'
  where
-  toE frag@(k' := m) = case testEquality k k' of
+  toE frag@(k' :** m) = case testEquality k k' of
     Just Refl -> Right m
     Nothing -> Left frag
 
-  fromE = either pure (fmap (k :=))
+  fromE = either pure (fmap (k :**))
 
 -- | '_Field10' taking the field lens rather than the 'Rep10'.
 _Field10'
-  :: (TestEquality (Rep10 rec), Representable10 rec)
+  :: forall rec a m
+   . (TestEquality (Rep10 rec), Representable10 rec)
   => (forall n. Getting (Ap10 a n) (rec n) (Ap10 a n))
-  -> Prism' (Fragment rec m) (m a)
-_Field10' l = _Field10 (field10 l)
+  -> Prism' (Rep10 rec :** m) (m a)
+_Field10' l = _Field10 @(Rep10 rec) (field10 l)
 
 infixr 5 !=
--- | Shortcut to construct a 'Fragment' from a 'Getter'.
+-- | Shortcut to construct a (':**') from a 'Getter'.
 --
 -- Note that this assumes the fields are ultimately wrapped in 'Ap10'.  If a
 -- particular field doesn't have 'Ap10' (which can only arise from a
@@ -94,21 +98,21 @@ infixr 5 !=
 (!=)
   :: Representable10 rec
   => (forall m. Getting (Ap10 a m) (rec m) (Ap10 a m))
-  -> f a -> Fragment rec f
-l != x = field10 l := x
+  -> f a -> Rep10 rec :** f
+l != x = field10 l :** x
 
 infixr 5 !=?
--- | Shortcut to construct a 'Fragment' using 'pure' for the value.
+-- | Shortcut to construct a (':**') using 'pure' for the value.
 (!=?)
   :: (Representable10 rec, Applicative f)
   => (forall m. Getting (Ap10 a m) (rec m) (Ap10 a m))
-  -> a -> Fragment rec f
+  -> a -> Rep10 rec :** f
 l !=? x = l != pure x
 
--- | Lifts a 'Setter' to work underneath 'Fragment'.
+-- | Lifts a 'Setter' to work underneath (':**').
 --
 -- This means if you know how to change the type of a whole record, you can use
--- this to change the type of a 'Fragment'.
+-- this to change the type of a (':**').
 --
 -- Example usage:
 --
@@ -116,15 +120,13 @@ l !=? x = l != pure x
 --     mrA :: Lens' (MyRecord a m) (MyRecord b m) (Ap10 m a) (Ap10 m b)
 --
 --     example
---       :: Fragment (Rep10 (MyRecord Int)) Identity
---       -> Fragment (Rep10 (MyRecord String)) Identity
+--       :: Rep10 (MyRecord Int) :** Identity
+--       -> Rep10 (MyRecord String) :** Identity
 --     example = fragmented (mrA.ap10) %~ show
 fragmented
-  :: (Functor m, Representable10 recA, Representable10 recB)
-  => ASetter
-       (recB (OpFragment recB m))
-       (recA (OpFragment recB m))
-       (OpFragment recB m b)
-       (OpFragment recB m a)
-  -> Setter (Fragment recA m) (Fragment recB m) a b
+  :: ( Functor m, Representable10 recA, Representable10 recB
+     , f ~ OpCostar m (Rep10 recB :** m)
+     )
+  => ASetter (recB f) (recA f) (f b) (f a)
+  -> Setter (Rep10 recA :** m) (Rep10 recB :** m) a b
 fragmented l = setting $ \f -> lmapFragment (l %~ contramap f)

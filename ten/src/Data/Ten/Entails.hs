@@ -21,11 +21,13 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
-module Data.Ten.Entails (Entails(..), Dict1(..), (:!:)) where
+module Data.Ten.Entails (Entails(..), Dict1(..), (:!:), withEntailment) where
 
 import Data.Kind (Constraint)
 import Data.Proxy (Proxy(..))
@@ -50,6 +52,9 @@ instance (forall a. c a) => Entails Proxy c where entailment _ = Dict1
 -- | Equality to a particular type entails any instance that type has.
 instance c a => Entails ((:~:) a) c where entailment Refl = Dict1
 
+-- | 'Dict1's entail their own type parameter.
+instance Entails (Dict1 c) c where entailment = id
+
 -- | A utility "typeclass newtype" that's convenient with 'Entails'.
 --
 -- If you want to use 'entailment' to get an instance of the form @c (d a)@,
@@ -58,3 +63,11 @@ instance c a => Entails ((:~:) a) c where entailment Refl = Dict1
 -- a dot near the typographic base line.
 class c (d a) => (c :!: d) a
 instance c (d a) => (c :!: d) a
+
+-- | Bring an instance into scope using an 'Entails' instance.
+--
+-- @
+--     (\ (k :: Int :~: b) (x :: b) -> withEntailment @Show k (show x)) Refl 2
+-- @
+withEntailment :: forall c k a r. Entails k c => k a -> (c a => r) -> r
+withEntailment k r = case entailment @_ @c k of Dict1 -> r

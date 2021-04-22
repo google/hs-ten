@@ -68,11 +68,14 @@ library:
     - Data.Ten.Exists
     - Data.Ten.Field
     - Data.Ten.Foldable
+    - Data.Ten.Foldable.WithIndex
     - Data.Ten.Fragment
     - Data.Ten.Functor
+    - Data.Ten.Functor.WithIndex
     - Data.Ten.Internal
     - Data.Ten.Representable
     - Data.Ten.Traversable
+    - Data.Ten.Traversable.WithIndex
     - Data.Ten.Update
 
 tests:

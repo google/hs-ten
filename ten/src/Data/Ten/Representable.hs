@@ -18,12 +18,14 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -31,7 +33,6 @@
 
 module Data.Ten.Representable
          ( Representable10(..)
-         , imap10, ifoldMap10, ifoldl10, ifoldr10, itraverse10
          , rep10', field10'
          , distributeRep10, collectRep10
          , GTabulate10(..)
@@ -41,7 +42,6 @@ module Data.Ten.Representable
 import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
 import Data.Kind (Type)
-import Data.Monoid (Dual(..), Endo(..))
 import Data.Type.Equality ((:~:)(..))
 import GHC.Generics
          ( Generic1(..)
@@ -56,9 +56,13 @@ import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..))
 import Data.Ten.Constrained (Constrained10(..), withConstrained)
 import Data.Ten.Field (Field10(..))
+import Data.Ten.Functor (Functor10(..))
+import Data.Ten.Functor.WithIndex (Index10, Functor10WithIndex(..))
 import Data.Ten.Foldable (Foldable10(..), fold10)
+import Data.Ten.Foldable.WithIndex (Foldable10WithIndex(..))
 import Data.Ten.Internal (starFst, starSnd)
-import Data.Ten.Traversable (Traversable10(..), fsequenceA10)
+import Data.Ten.Traversable (Traversable10(..))
+import Data.Ten.Traversable.WithIndex (Traversable10WithIndex(..))
 
 (.:) :: (q -> r) -> (a -> b -> q) -> a -> b -> r
 (.:) = (.) . (.)
@@ -99,41 +103,31 @@ field10'
   => (rec (Rep10 rec) -> Ap10 a (Rep10 rec)) -> Rep10 rec a
 field10' f = rep10' (unAp10 . f)
 
--- | 'Data.Ten.Functor10.fmap10' with an index parameter.
---
--- The additional 'Rep10' parameter is a GADT-like type that identifies the
--- current field within @f@ and its type.  Frequently this will be @Field10 f@,
--- but it may also be an actual hand-coded GADT.
-imap10
-  :: Representable10 f
-  => (forall a. Rep10 f a -> m a -> n a) -> f m -> f n
-imap10 f fm = tabulate10 (\i -> f i (fm `index10` i))
+-- | Superclass appeasement; deriving via this will give infinite loops; don't!
+deriving via (f :: (k -> Type) -> Type)
+  instance Functor10 f => Functor10 (Wrapped1 Representable10 f)
 
--- | 'Data.Ten.Foldable.foldMap10' with an index parameter.
-ifoldMap10
-  :: (Monoid w, Foldable10 f, Representable10 f)
-  => (forall a. Rep10 f a -> m a -> w) -> f m -> w
-ifoldMap10 f fm = fold10 $ imap10 (Const .: f) fm
+-- | Superclass appeasement; deriving via this will give infinite loops; don't!
+deriving via (f :: (k -> Type) -> Type)
+  instance Foldable10 f => Foldable10 (Wrapped1 Representable10 f)
 
--- | 'Data.Ten.Foldable.foldl10' with an index parameter.
-ifoldl10
-  :: (Foldable10 f, Representable10 f)
-  => (forall a. Rep10 f a -> b -> m a -> b) -> b -> f m -> b
-ifoldl10 f z fm = appEndo (ifoldMap10 (\i x -> Endo (\b -> f i b x)) fm) z
+-- | Superclass appeasement; deriving via this will give infinite loops; don't!
+deriving via (f :: (k -> Type) -> Type)
+  instance Traversable10 f => Traversable10 (Wrapped1 Representable10 f)
 
--- | 'Data.Ten.Foldable.foldr10' with an index parameter.
-ifoldr10
-  :: (Foldable10 f, Representable10 f)
-  => (forall a. Rep10 f a -> m a -> b -> b) -> b -> f m -> b
-ifoldr10 f z fm = flip appEndo z $ getDual $
-  ifoldMap10 (\i x -> Dual $ Endo (f i x)) fm
+type instance Index10 (Wrapped1 Representable10 f) = Rep10 f
 
--- | 'Data.Ten.Traversable.traverse10' with an index parameter.
-itraverse10
-  :: (Applicative f, Traversable10 t, Representable10 t)
-  => (forall a. Rep10 t a -> m a -> f (n a))
-  -> t m -> f (t n)
-itraverse10 f fm = fsequenceA10 $ imap10 (Comp1 .: f) fm
+instance Representable10 f
+      => Functor10WithIndex (Wrapped1 Representable10 f) where
+  imap10 f (Wrapped1 fm) = Wrapped1 $ tabulate10 (\i -> f i (fm `index10` i))
+
+instance (Representable10 f, Foldable10 f)
+      => Foldable10WithIndex (Wrapped1 Representable10 f) where
+  ifoldMap10 f fm = fold10 $ imap10 (Const .: f) fm
+
+instance (Representable10 f, Traversable10 f)
+      => Traversable10WithIndex (Wrapped1 Representable10 f) where
+  imapTraverse10 r f fm = mapTraverse10 r unComp1 $ imap10 (Comp1 .: f) fm
 
 -- | Analog of 'Data.Functor.Rep.distributeRep' for 'Representable10'.
 --

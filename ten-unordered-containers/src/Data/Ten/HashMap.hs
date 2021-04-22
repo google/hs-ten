@@ -45,7 +45,7 @@ import Data.Maybe (fromMaybe)
 import Data.Type.Equality ((:~:)(..), TestEquality(..))
 import GHC.Exts (IsList)
 import qualified GHC.Exts as Exts
-import GHC.Generics (Generic1)
+import GHC.Generics (Generic1, (:.:)(..))
 
 import Data.Hashable (Hashable(..))
 import Data.HashMap.Strict (HashMap)
@@ -56,8 +56,11 @@ import Data.Wrapped (Wrapped1(..))
 import Data.Ten.Entails (Entails(..), Dict1(..), (:!:))
 import Data.Ten.Exists (Exists(..))
 import Data.Ten.Foldable (Foldable10(..))
+import Data.Ten.Foldable.WithIndex (Foldable10WithIndex(..))
 import Data.Ten.Functor (Functor10(..))
+import Data.Ten.Functor.WithIndex (Index10, Functor10WithIndex(..))
 import Data.Ten.Traversable (Traversable10(..))
+import Data.Ten.Traversable.WithIndex (Traversable10WithIndex(..))
 
 infixr 5 :=>
 data Entry k m = forall a. !(k a) :=> m a
@@ -73,8 +76,16 @@ instance Foldable10 (Entry k) where foldMap10 f (_ :=> m) = f m
 instance Traversable10 (Entry k) where
   mapTraverse10 r f (k :=> m) = r . (k :=>) <$> f m
 
+type instance Index10 (Entry k) = k
+instance Functor10WithIndex (Entry k) where imap10 f (k :=> m) = k :=> f k m
+instance Foldable10WithIndex (Entry k) where ifoldMap10 f (k :=> m) = f k m
+instance Traversable10WithIndex (Entry k) where
+  imapTraverse10 r f (k :=> m) = r . (k :=>) <$> f k m
+
 type Hashable1 k = forall x. Hashable (k x)
 type Eq1 k = forall x. Eq (k x)
+
+type instance Index10 (HashMap10 k) = k
 
 -- | A "dependent" hash map, where elements' type parameters match their keys'.
 newtype HashMap10 k m = HashMap10 (HashMap (Exists k) (Entry k m))
@@ -82,6 +93,9 @@ newtype HashMap10 k m = HashMap10 (HashMap (Exists k) (Entry k m))
   deriving
     ( Functor10, Foldable10, Traversable10
     ) via Wrapped1 Generic1 (HashMap10 k)
+  deriving
+    ( Functor10WithIndex, Foldable10WithIndex, Traversable10WithIndex
+    ) via HashMap (Exists k) :.: Entry k
 
 instance (TestEquality k, Eq1 k, Hashable1 k) => IsList (HashMap10 k m) where
   type Item (HashMap10 k m) = Entry k m

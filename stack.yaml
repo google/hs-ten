@@ -21,7 +21,7 @@ packages:
 
 extra-deps:
 - github: google/hs-portray
-  commit: b60db92fa430b8ff4ef170c57b86500885c25645
+  commit: 2b88ef2bfde420673f5143eadd3da4a5d30eca8c
   subdirs:
     - portray
     - portray-pretty

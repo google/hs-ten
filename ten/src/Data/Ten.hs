@@ -24,18 +24,26 @@
 -- the result morphisms are of the form @f m -> f n@.
 --
 -- The main parts of this are:
--- - 'Functor10' and the other similarly-named typeclasses, which are
+--
+-- * 'Functor10' and the other similarly-named typeclasses, which are
 -- essentially just translations of 'Functor' et al. to kind
 -- @(k -> Type) -> Type@.
 -- These are essentially 'Functor's with additional \"tag\" types
 -- available at each occurrence of the argument.  Applying them to
--- @Identity@, you get essentially records, but other type parameters
+-- @Identity@, you get essentially normal records, but other type parameters
 -- give other interesting objects.
--- - 'Constrained10', which allows a 'Functor10' to provide instances of a
--- typeclass for each of its elements.  This adds a lot of power to the
--- otherwise-pretty-weak 'Functor10' class hierarchy, since without access to
--- corresponding instances, all the input morphisms are unable to do anything
--- whatsoever with the \"tag\" types.
+--
+-- * (':**') and 'Exists' (two stock 'Functor10' types) plus appropriate
+-- instances for products, sums, and compositions of functors as provided by
+-- "GHC.Generics": (':*:'), (':+:'), and (':.:').
+--
+-- * 'Entails', which uses a GADT-like value to retrieve instances for its type
+-- parameter.  This adds a lot of power to the otherwise-pretty-weak
+-- 'Functor10' class hierarchy, since without access to corresponding
+-- instances, all the input morphisms are unable to do anything whatsoever with
+-- the \"tag\" types.  With 'Entails', though, one can use the fact that every
+-- occurrence of @m a@ in @f m@ satisfies @c a@ to make instances of @c@
+-- available while mapping/folding/traversing/etc. an @f m@.
 --
 -- The provided GHC.Generics-based deriving functionality is meant to be used
 -- with the DerivingVia extension.  To get the full suite of classes on a
@@ -43,12 +51,19 @@
 -- nested generic-record, or an instance of 'Data.Functor.Update' applied to
 -- one of the above.  Then, just add the deriving clauses:
 --
--- data MyType f = MyType { ... }
---   deriving Generic1
---   deriving
---     ( Functor10, Foldable10, Traversable10
---     , Applicative10, Constrained10 c
---     ) via Wrapped1 Generic1 MyType
+-- @
+--     data MyType f = MyType { _mrInt :: Ap10 Int f, _mrBool :: Ap10 Bool f }
+--       deriving Generic1
+--       deriving
+--         ( Functor10, Foldable10, Traversable10
+--         , Applicative10, Representable10, Update10, Constrained10 c
+--         ) via Wrapped1 Generic1 MyType
+--       deriving
+--         ( Functor10WithIndex, Foldable10WithIndex, Traversable10WithIndex
+--         ) via Wrapped1 Representable10 MyType
+--
+--     type instance Index10 MyType = Rep10 MyType
+-- @
 
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}

@@ -38,7 +38,7 @@ import Data.Functor.Rep (Representable(..), distributeRep)
 import Data.Ten
          ( Functor10(..), Foldable10(..), Traversable10
          , Applicative10(..), Constrained10, Representable10, Update10
-         , Ap10(..), Pair10(..)
+         , Ap10(..)
          )
 import Data.Wrapped (Wrapped1(..))
 
@@ -55,7 +55,7 @@ instance Distributive Pair where distribute = distributeRep
 data Foo f = Foo
   { x :: Ap10 Word f
   , y :: Ap10 Char f
-  , z :: Pair10 Bool Double f
+  , z :: Ap10 Double f
   , w :: Pair (Ap10 Int f)
   }
   deriving (Generic, Generic1)
@@ -102,7 +102,7 @@ theMask :: BoolFoo
 theMask = Foo {
   x = cFalse,
   y = cTrue,
-  z = Pair10 (Const True) (Const False),
+  z = cTrue,
   w = Pair cTrue cFalse
  }
 
@@ -116,7 +116,7 @@ masked :: MaybeFoo
 masked = Foo {
   x = fNothing,
   y = fJust 'y',
-  z = Pair10 (Just False) Nothing,
+  z = Ap10 (Just 456.0),
   w = Pair (fJust 6) fNothing
  }
 
@@ -127,7 +127,7 @@ basic :: BasicFoo
 basic = Foo {
   x = val 123,
   y = val 'y',
-  z = Pair10 (Identity False) (Identity 456.0),
+  z = val 456.0,
   w = Pair (val 6) (val 7)
  }
 

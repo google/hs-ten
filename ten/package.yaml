@@ -64,6 +64,7 @@ library:
     - Data.Ten.Ap
     - Data.Ten.Applicative
     - Data.Ten.Constrained
+    - Data.Ten.Entails
     - Data.Ten.Exists
     - Data.Ten.Field
     - Data.Ten.Foldable

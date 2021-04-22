@@ -56,6 +56,8 @@ import Data.Wrapped (Wrapped1(..))
 import Data.Functor.Field (GFieldPaths(..))
 import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..))
+import Data.Ten.Constrained (Constrained10(..), pure10C)
+import Data.Ten.Entails (Entails(..), Dict1(..))
 import Data.Ten.Internal
          ( PathComponent(..), dropUnderscore, showsPath, portrayPath
          )
@@ -89,6 +91,9 @@ instance FieldPaths10 f => Show (Field10 f a) where
 
 instance FieldPaths10 f => Portray (Field10 f a) where
   portray (Field10 f) = Apply "Field10" [portrayPath $ coerce $ f fieldPaths10]
+
+instance (Constrained10 c f, Applicative10 f) => Entails (Field10 f) c where
+  entailment (Field10 f) = f (pure10C @c Dict1)
 
 -- | Provides a path of field selectors / lenses identifying each "field".
 class FieldPaths10 (rec :: (k -> Type) -> Type) where

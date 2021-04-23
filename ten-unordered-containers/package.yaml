@@ -41,3 +41,18 @@ library:
   source-dirs: src
   exposed-modules:
     - Data.Ten.HashMap
+
+tests:
+  HashMap-test:
+    source-dirs: test
+    main: Main.hs
+    dependencies:
+      - lens
+      - portray-pretty
+      - ten-lens
+      - ten-unordered-containers
+      - test-framework
+      - test-framework-hunit
+      - text
+      - transformers
+      - HUnit

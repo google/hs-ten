@@ -43,6 +43,7 @@ module Data.Ten.Field
 
 import Control.Monad.Trans.State (state, evalState)
 import Data.Coerce (coerce)
+import Data.Functor ((<&>))
 import Data.Functor.Const (Const(..))
 import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy(..))
@@ -60,10 +61,11 @@ import Data.Hashable (Hashable(..))
 import Data.Portray (Portray(..), Portrayal(..))
 import Data.Wrapped (Wrapped1(..))
 
-import Data.Functor.Field (GFieldPaths(..))
+import Data.Functor.Field (FieldPaths(..))
 import Data.Ten.Ap (Ap10(..))
 import Data.Ten.Applicative (Applicative10(..))
 import Data.Ten.Entails (Entails(..), Dict1(..))
+import Data.Ten.Functor (Functor10(..))
 import Data.Ten.Internal
          ( PathComponent(..), dropUnderscore, showsPath, portrayPath
          )
@@ -115,12 +117,12 @@ instance GFieldPaths10 U1 where
   gfieldPaths10 _ = U1
   {-# INLINE gfieldPaths10 #-}
 
-instance GFieldPaths10 (Ap10 a) where
-  gfieldPaths10 r = Ap10 $ r []
-  {-# INLINE gfieldPaths10 #-}
+instance FieldPaths10 (Ap10 a) where
+  fieldPaths10 = Ap10 (Const [])
+  {-# INLINE fieldPaths10 #-}
 
-instance GFieldPaths10 rec => GFieldPaths10 (Rec1 rec) where
-  gfieldPaths10 r = Rec1 $ gfieldPaths10 r
+instance (Functor10 rec, FieldPaths10 rec) => GFieldPaths10 (Rec1 rec) where
+  gfieldPaths10 r = Rec1 $ fmap10 (r . getConst) fieldPaths10
   {-# INLINE gfieldPaths10 #-}
 
 instance GFieldPaths10 rec => GFieldPaths10 (M1 C i rec) where
@@ -151,9 +153,10 @@ instance (GFieldPaths10 f, GFieldPaths10 g) => GFieldPaths10 (f :*: g) where
   gfieldPaths10 r = gfieldPaths10 r :*: gfieldPaths10 r
   {-# INLINE gfieldPaths10 #-}
 
-instance (GFieldPaths f, GFieldPaths10 g) => GFieldPaths10 (f :.: g) where
+instance (Functor f, FieldPaths f, GFieldPaths10 g)
+      => GFieldPaths10 (f :.: g) where
   gfieldPaths10 r = Comp1 $
-    gfieldPaths $ \outer ->
+    fieldPaths <&> \outer ->
     gfieldPaths10 $ \inner ->
     r $ outer ++ inner
   {-# INLINE gfieldPaths10 #-}

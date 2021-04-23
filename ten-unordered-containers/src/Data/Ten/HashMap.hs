@@ -24,6 +24,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -77,6 +78,14 @@ newtype HashMap10 k m = HashMap10 (HashMap (Exists k) (k :** m))
   deriving
     ( Functor10WithIndex, Foldable10WithIndex, Traversable10WithIndex
     ) via HashMap (Exists k) :.: ((:**) k)
+
+deriving stock
+  instance (TestEquality k, forall a. Eq (k a), Entails k (Eq :!: m))
+        => Eq (HashMap10 k m)
+
+deriving stock
+  instance (forall a. Show (k a), Entails k (Show :!: m))
+        => Show (HashMap10 k m)
 
 instance (TestEquality k, Eq1 k, Hashable1 k) => IsList (HashMap10 k m) where
   type Item (HashMap10 k m) = k :** m

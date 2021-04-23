@@ -21,12 +21,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Main where
 
 import Control.Monad.Trans.Writer (runWriter, tell)
+import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
 import Data.Kind (Type)
 import Data.Monoid (Sum(..))
@@ -70,6 +72,11 @@ data ExampleRecord f = ExampleRecord
     ( Functor10, Foldable10, Traversable10, Constrained10 c
     , Applicative10, Representable10, Update10, FieldPaths10
     ) via Wrapped1 Generic1 ExampleRecord
+  deriving
+    ( Functor10WithIndex, Foldable10WithIndex, Traversable10WithIndex
+    ) via Wrapped1 Representable10 ExampleRecord
+
+type instance Index10 ExampleRecord = Field10 ExampleRecord
 
 $(makeLenses 'InnerRecord)
 $(makeLenses 'ExampleRecord)
@@ -97,10 +104,9 @@ main = defaultMain
   , testCase "portray Identity" $
       prettyShow exampleMap @?=
         "fromList\n\
-        \  [ Field10 _erInt :** Identity { runIdentity = 2 }\n\
-        \  , Field10 _erBool :** Identity { runIdentity = True }\n\
-        \  , Field10 (_irText . _erNest) :** Identity {\
-             \ runIdentity = \"aoeu\" }\n\
+        \  [ Field10 _erInt :** Identity 2\
+          \, Field10 _erBool :** Identity True\n\
+        \  , Field10 (_irText . _erNest) :** Identity \"aoeu\"\n\
         \  ]"
 
   , testCase "length10" $
@@ -119,4 +125,14 @@ main = defaultMain
           ]
       , ["2", "True", "\"aoeu\""]
       )
+
+  , testCase "toHashMap" $
+      ifoldr10 HM.insert HM.empty
+        (tabulate10 @Type @ExampleRecord (Const . prettyShow)) @?=
+      HM.fromList
+        [ erInt != Const "Field10 _erInt"
+        , erBool != Const "Field10 _erBool"
+        , erNest.irText != Const "Field10 (_irText . _erNest)"
+        , erNest.irText2 != Const "Field10 (_irText2 . _erNest)"
+        ]
   ]

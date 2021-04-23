@@ -34,6 +34,7 @@ import Data.Kind (Type)
 import Data.Monoid (Sum(..))
 import Data.Proxy (Proxy(..))
 import Data.Text (Text)
+import Data.Type.Equality (TestEquality(..), (:~:)(..))
 import GHC.Generics (Generic, Generic1)
 import Type.Reflection (TypeRep, Typeable, typeRep)
 
@@ -83,6 +84,9 @@ $(makeLenses 'ExampleRecord)
 
 dynProxy :: forall (a :: Type). Typeable a => TypeRep :** Proxy
 dynProxy = typeRep @a :** Proxy @a
+
+dyn :: forall a. Typeable a => a -> TypeRep :** Identity
+dyn x = typeRep @a :** Identity x
 
 exampleMap :: HM.HashMap10 (Field10 ExampleRecord) Identity
 exampleMap = HM.fromList
@@ -135,4 +139,27 @@ main = defaultMain
         , erNest.irText != Const "Field10 (_irText . _erNest)"
         , erNest.irText2 != Const "Field10 (_irText2 . _erNest)"
         ]
+
+  , testCase "dyns" $
+      HM.lookup (typeRep @Bool)
+          (HM.fromList [dyn True, dyn not, dyn (dyn @Int)]) @?=
+        Just (Identity True)
+
+  , testCase "map dyns" $
+      imap10
+        (\ ty (Identity x) -> Const @String $ case ty of
+             _
+               | Just Refl <- testEquality ty (typeRep @String) -> x
+               | Just Refl <- testEquality ty (typeRep @Bool) -> (show x)
+               | Just Refl <- testEquality ty (typeRep @(Bool -> Bool))
+                   -> "<function>"
+               | otherwise -> "<unknown>"
+             )
+        (HM.fromList [dyn True, dyn @String "hi", dyn not, dyn 'a']) @?=
+        (HM.fromList
+          [ typeRep @String :** Const "hi"
+          , typeRep @Bool :** Const "True"
+          , typeRep @(Bool -> Bool) :** Const "<function>"
+          , typeRep @Char :** Const "<unknown>"
+          ])
   ]

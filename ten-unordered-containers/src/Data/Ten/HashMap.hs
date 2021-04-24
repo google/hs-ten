@@ -42,7 +42,8 @@ module Data.Ten.HashMap
 import Prelude hiding (lookup)
 
 import qualified Data.Foldable as F
-import Data.Maybe (fromMaybe)
+import Data.Maybe (catMaybes, fromMaybe)
+import Data.Semigroup (Any(..), All(..))
 import Data.Type.Equality ((:~:)(..), TestEquality(..))
 import GHC.Exts (IsList)
 import qualified GHC.Exts as Exts
@@ -52,6 +53,7 @@ import Data.Hashable (Hashable(..))
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HM
 import Data.Portray (Portray(..), Portrayal(..))
+import Data.Portray.Diff (Diff(..), diffVs)
 import Data.Wrapped (Wrapped1(..))
 
 import Data.Ten.Entails (Entails(..), (:!:))
@@ -66,6 +68,9 @@ import Data.Ten.Sigma ((:**)(..))
 
 type Hashable1 k = forall x. Hashable (k x)
 type Eq1 k = forall x. Eq (k x)
+type Show1 k = forall x. Show (k x)
+type Portray1 k = forall x. Portray (k x)
+type Diff1 k = forall x. Diff (k x)
 
 type instance Index10 (HashMap10 k) = k
 
@@ -80,21 +85,50 @@ newtype HashMap10 k m = HashMap10 (HashMap (Exists k) (k :** m))
     ) via HashMap (Exists k) :.: ((:**) k)
 
 deriving stock
-  instance (TestEquality k, forall a. Eq (k a), Entails k (Eq :!: m))
-        => Eq (HashMap10 k m)
+  instance (TestEquality k, Eq1 k, Entails k (Eq :!: m)) => Eq (HashMap10 k m)
 
 deriving stock
-  instance (forall a. Show (k a), Entails k (Show :!: m))
-        => Show (HashMap10 k m)
+  instance (Show1 k, Entails k (Show :!: m)) => Show (HashMap10 k m)
 
 instance (TestEquality k, Eq1 k, Hashable1 k) => IsList (HashMap10 k m) where
   type Item (HashMap10 k m) = k :** m
   toList = toList
   fromList = fromList
 
-instance (forall a. Portray (k a), Entails k (Portray :!: m))
+instance (Portray1 k, Entails k (Portray :!: m))
       => Portray (HashMap10 k m) where
   portray = Apply "fromList" . pure . portray . toList
+
+data EntryDiff a = InLeft a | InBoth a a | InRight a
+
+diffToM :: Maybe Portrayal -> ((Any, All), Maybe Portrayal)
+diffToM = \case
+  Nothing -> ((Any False, All False), Nothing)
+  Just d  -> ((Any True, All True), Just d)
+
+diffM :: (Diff a, Portray a) => EntryDiff a -> ((Any, All), Maybe Portrayal)
+diffM e = diffToM $ case e of
+  InLeft x -> Just $ portray x `diffVs` "_"
+  InBoth x y -> diff x y
+  InRight y -> Just $ "_" `diffVs` portray y
+
+instance ( TestEquality k, Eq1 k, Hashable1 k, Portray1 k, Diff1 k
+         , Entails k (Portray :!: m), Entails k (Diff :!: m)
+         )
+      => Diff (HashMap10 k m) where
+  diff (HashMap10 l) (HashMap10 r) =
+    if anyDiff
+      then
+        Just $ Apply "fromList" $ pure $ List $
+        (if allDiff then id else (++ ["..."])) $
+        catMaybes $ F.toList diffs
+      else Nothing
+   where
+    ((Any anyDiff, All allDiff), diffs) =
+      traverse diffM $
+      HM.unionWith (\ (InLeft x) (InRight y) -> InBoth x y)
+        (InLeft <$> l)
+        (InRight <$> r)
 
 -- | An empty 'HashMap10'.
 empty :: HashMap10 k m

@@ -54,6 +54,7 @@ import Data.Distributive (Distributive(..))
 import Data.Hashable (Hashable(..))
 import Data.Functor.Rep (Representable(..), distributeRep, collectRep)
 import Data.Portray (Portray(..), Portrayal(..))
+import Data.Portray.Diff (Diff(..), diffVs)
 import Data.Wrapped (Wrapped1(..))
 
 import Data.Ten.Internal
@@ -88,6 +89,11 @@ instance FieldPaths f => Show (Field f) where
 
 instance FieldPaths f => Portray (Field f) where
   portray (Field f) = Apply "Field" [portrayPath $ f fieldPaths]
+
+instance (Traversable f, Applicative f, FieldPaths f) => Diff (Field f) where
+  diff f g
+    | f == g    = Nothing
+    | otherwise = Just $ portray f `diffVs` portray g
 
 instance (Generic1 rec, GFieldPaths (Rep1 rec))
       => FieldPaths (Wrapped1 Generic1 rec) where

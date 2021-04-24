@@ -29,6 +29,7 @@ import Data.Type.Equality ((:~:)(..), TestEquality(..))
 
 import Data.Hashable (Hashable(..))
 import Data.Portray (Portray(..), Portrayal(..))
+import Data.Portray.Diff (Diff(..), diffVs)
 
 import Data.Ten.Functor (Functor10(..))
 import Data.Ten.Foldable (Foldable10(..))
@@ -57,6 +58,12 @@ instance (forall a. Hashable (m a)) => Hashable (Exists m) where
 
 instance (forall a. Portray (m a)) => Portray (Exists m) where
   portray (Exists x) = Apply (Atom "Exists") [portray x]
+
+instance (TestEquality m, forall a. Portray (m a), forall a. Diff (m a))
+      => Diff (Exists m) where
+  diff (Exists x) (Exists y) = case testEquality x y of
+    Just Refl -> diff x y
+    Nothing   -> Just $ portray x `diffVs` portray y
 
 instance Functor10 Exists where
   fmap10 f (Exists x) = Exists (f x)

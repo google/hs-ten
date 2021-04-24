@@ -37,10 +37,12 @@ module Data.Ten.Sigma
          ) where
 
 import Data.Functor.Contravariant (Contravariant(..))
+import Data.Maybe (fromMaybe)
 import Data.Type.Equality ((:~:)(Refl), TestEquality(..))
 
 import Control.DeepSeq (NFData(..))
 import Data.Portray (Portray(..), Portrayal(..), infixr_)
+import Data.Portray.Diff (Diff(..), diffVs)
 
 import Data.Ten.Entails ((:!:), Entails, withEntailment)
 import Data.Ten.Foldable (Foldable10(..))
@@ -103,6 +105,22 @@ instance (forall a. Portray (k a), Entails k (Portray :!: m))
       => Portray (k :** m) where
   portray (ka :** ma) = withEntailment @(Portray :!: m) ka $
     Binop ":**" (infixr_ 5) (portray ka) (portray ma)
+
+instance ( TestEquality k, forall a. Portray (k a), forall a. Diff (k a)
+         , Entails k (Portray :!: m), Entails k (Diff :!: m)
+         )
+      => Diff (k :** m) where
+  diff (ka :** ma) (kb :** mb) = case testEquality ka kb of
+    Just Refl -> withEntailment @(Diff :!: m) ka $
+      case (diff ka kb, diff ma mb) of
+        (Nothing, Nothing) -> Nothing
+        (dk, dm) ->
+          Just $ Binop ":**" (infixr_ 5)
+            (fromMaybe (portray ka) dk)
+            (fromMaybe "_" dm)
+    Nothing   -> Just $
+      withEntailment @(Portray :!: m) ka (portray (ka :** ma)) `diffVs`
+      withEntailment @(Portray :!: m) kb (portray (kb :** mb))
 
 instance Functor10 ((:**) k) where fmap10 f (k :** m) = k :** f m
 instance Foldable10 ((:**) k) where foldMap10 f (_ :** m) = f m

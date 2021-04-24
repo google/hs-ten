@@ -36,10 +36,11 @@ import GHC.Generics (Generic)
 import Control.DeepSeq (NFData)
 import Data.Default.Class (Default(..))
 import Data.Portray (Portray)
+import Data.Portray.Diff (Diff)
 
 -- | A 'Data.Ten.Functor.Functor10' made by applying the argument to some type.
 newtype Ap10 (a :: k) (f :: k -> Type) = Ap10 { unAp10 :: f a }
   deriving stock (Eq, Ord, Show, Generic)
-  deriving newtype (Default, Portray)
+  deriving newtype (Default, Portray, Diff)
 
 instance (NFData a, NFData (f a)) => NFData (Ap10 a f)

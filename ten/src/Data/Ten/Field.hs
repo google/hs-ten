@@ -59,6 +59,7 @@ import GHC.TypeLits (KnownSymbol, symbolVal)
 
 import Data.Hashable (Hashable(..))
 import Data.Portray (Portray(..), Portrayal(..))
+import Data.Portray.Diff (Diff(..), diffVs)
 import Data.Wrapped (Wrapped1(..))
 
 import Data.Functor.Field (FieldPaths(..))
@@ -99,6 +100,12 @@ instance FieldPaths10 f => Show (Field10 f a) where
 
 instance FieldPaths10 f => Portray (Field10 f a) where
   portray (Field10 f) = Apply "Field10" [portrayPath $ coerce $ f fieldPaths10]
+
+instance (Traversable10 f, Applicative10 f, FieldPaths10 f)
+      => Diff (Field10 f a) where
+  diff f g
+    | f == g    = Nothing
+    | otherwise = Just $ portray f `diffVs` portray g
 
 -- | Provides a path of field selectors / lenses identifying each "field".
 class FieldPaths10 (rec :: (k -> Type) -> Type) where

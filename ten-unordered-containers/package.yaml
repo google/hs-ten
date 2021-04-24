@@ -33,6 +33,7 @@ dependencies:
   - base >= 4.12 && < 4.16
   - hashable >= 1.0 && < 1.4
   - portray >= 0.1 && < 0.2
+  - portray-diff >= 0.1 && < 0.2
   - ten >= 0.1 && < 0.2
   - unordered-containers >= 0.1 && < 0.3
   - wrapped >= 0.1 && < 0.2

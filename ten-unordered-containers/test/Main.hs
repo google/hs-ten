@@ -45,7 +45,8 @@ import Test.Framework.Providers.HUnit (testCase)
 import Test.HUnit ((@?=))
 
 import Data.Portray (Portray)
-import Data.Portray.Pretty (prettyShow)
+import Data.Portray.Diff.HUnit ((@?-))
+import Data.Portray.Pretty (showPortrayal)
 
 import Data.Ten.HashMap as HM
 import Data.Ten
@@ -98,15 +99,15 @@ exampleMap = HM.fromList
 main :: IO ()
 main = defaultMain
   [ testCase "portray empty" $
-      prettyShow (HM.fromList @TypeRep @Proxy []) @?= "fromList []"
+      showPortrayal (HM.fromList @TypeRep @Proxy []) @?= "fromList []"
 
   , testCase "portray non-empty" $
-      prettyShow (HM.fromList [dynProxy @Int, dynProxy @(Int -> Int)]) @?=
+      showPortrayal (HM.fromList [dynProxy @Int, dynProxy @(Int -> Int)]) @?=
         "fromList\n\
         \  [ typeRep @Int :** Proxy, typeRep @(Int -> Int) :** Proxy ]"
 
   , testCase "portray Identity" $
-      prettyShow exampleMap @?=
+      showPortrayal exampleMap @?=
         "fromList\n\
         \  [ Field10 _erInt :** Identity 2\
           \, Field10 _erBool :** Identity True\n\
@@ -120,8 +121,8 @@ main = defaultMain
   , testCase "traverse10C" $
       runWriter
         (traverse10C @Portray
-          (\ (Identity x) -> [x, x] <$ tell [prettyShow x])
-          exampleMap) @?=
+          (\ (Identity x) -> [x, x] <$ tell [showPortrayal x])
+          exampleMap) @?-
       ( HM.fromList
           [ erInt != [2, 2]
           , erBool != [True, True]
@@ -132,7 +133,7 @@ main = defaultMain
 
   , testCase "toHashMap" $
       ifoldr10 HM.insert HM.empty
-        (tabulate10 @Type @ExampleRecord (Const . prettyShow)) @?=
+        (tabulate10 @Type @ExampleRecord (Const . showPortrayal)) @?-
       HM.fromList
         [ erInt != Const "Field10 _erInt"
         , erBool != Const "Field10 _erBool"
@@ -155,7 +156,7 @@ main = defaultMain
                    -> "<function>"
                | otherwise -> "<unknown>"
              )
-        (HM.fromList [dyn True, dyn @String "hi", dyn not, dyn 'a']) @?=
+        (HM.fromList [dyn True, dyn @String "hi", dyn not, dyn 'a']) @?-
         (HM.fromList
           [ typeRep @String :** Const "hi"
           , typeRep @Bool :** Const "True"

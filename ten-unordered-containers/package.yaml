@@ -49,6 +49,7 @@ tests:
     main: Main.hs
     dependencies:
       - lens
+      - portray-diff-hunit
       - portray-pretty
       - ten-lens
       - ten-unordered-containers

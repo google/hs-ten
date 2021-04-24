@@ -57,7 +57,6 @@ data InnerRecord f = InnerRecord
   , _irText2 :: Ap10 Text f
   }
   deriving (Generic, Generic1)
-  -- deriving Portray via Wrapped Generic (InnerRecord f)
   deriving
     ( Functor10, Foldable10, Traversable10, Constrained10 c
     , Applicative10, Representable10, Update10, FieldPaths10
@@ -69,7 +68,6 @@ data ExampleRecord f = ExampleRecord
   , _erNest :: InnerRecord f
   }
   deriving (Generic, Generic1)
-  -- deriving Portray via Wrapped Generic (ExampleRecord f)
   deriving
     ( Functor10, Foldable10, Traversable10, Constrained10 c
     , Applicative10, Representable10, Update10, FieldPaths10

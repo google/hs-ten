@@ -13,6 +13,7 @@
 -- limitations under the License.
 
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveTraversable #-}
@@ -26,46 +27,53 @@
 
 module Main where
 
-import GHC.Generics (Generic, Generic1)
+import Control.DeepSeq (NFData(..))
 import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
 import Data.Monoid (Sum(..))
+import GHC.Generics (Generic, Generic1)
 
+import Data.Default.Class (Default(..))
 import Data.Distributive (Distributive(..))
 import Data.Functor.Field (FieldRep(..))
 import Data.Functor.Update (Update)
 import Data.Functor.Rep (Representable(..), distributeRep)
+import Data.Portray (Portray)
+import Data.Portray.Diff (Diff)
 import Data.Ten
          ( Functor10(..), Foldable10(..), Traversable10
          , Applicative10(..), Constrained10, Representable10, Update10
          , Ap10(..)
          )
-import Data.Wrapped (Wrapped1(..))
+import Data.Wrapped (Wrapped1(..), Wrapped(..))
 
 import Test.HUnit.Lang (assertEqual)
 import Test.Framework (defaultMain)
 import Test.Framework.Providers.HUnit (testCase)
 
 data Pair a = Pair a a
-  deriving stock (Functor, Foldable, Traversable, Show, Eq, Generic, Generic1)
+  deriving
+    ( Functor, Foldable, Traversable
+    , Eq, Ord, Read, Show, Default, NFData
+    , Generic, Generic1
+    )
   deriving (Representable, Update, Applicative, Monad) via FieldRep Pair
+  deriving (Portray, Diff) via Wrapped Generic (Pair a)
 
 instance Distributive Pair where distribute = distributeRep
 
 data Foo f = Foo
   { x :: Ap10 Word f
-  , y :: Ap10 Char f
+  , y :: Ap10 String f
   , z :: Ap10 Double f
   , w :: Pair (Ap10 Int f)
   }
-  deriving (Generic, Generic1)
+  deriving (Eq, Ord, Read, Show, Default, NFData, Generic, Generic1)
+  deriving (Portray, Diff) via Wrapped Generic (Foo f)
   deriving
     ( Foldable10, Traversable10, Constrained10 c
     , Functor10, Applicative10, Representable10, Update10
     ) via Wrapped1 Generic1 Foo
-
-deriving instance Show (Foo Maybe)
-deriving instance Eq (Foo Maybe)
 
 type BasicFoo = Foo Identity
 type MaybeFoo = Foo Maybe
@@ -75,7 +83,8 @@ data Bar f = Bar
   { ordinaryField :: Ap10 Int f
   , nestedField :: Foo f
   }
-  deriving (Generic, Generic1)
+  deriving (Eq, Ord, Read, Show, Default, NFData, Generic, Generic1)
+  deriving (Portray, Diff) via Wrapped Generic (Bar f)
   deriving
     ( Foldable10, Traversable10, Constrained10 c
     , Functor10, Applicative10, Representable10, Update10
@@ -115,7 +124,7 @@ fJust a = Ap10 (Just a)
 masked :: MaybeFoo
 masked = Foo {
   x = fNothing,
-  y = fJust 'y',
+  y = fJust "y",
   z = Ap10 (Just 456.0),
   w = Pair (fJust 6) fNothing
  }
@@ -126,7 +135,7 @@ val a = Ap10 (Identity a)
 basic :: BasicFoo
 basic = Foo {
   x = val 123,
-  y = val 'y',
+  y = val "y",
   z = val 456.0,
   w = Pair (val 6) (val 7)
  }

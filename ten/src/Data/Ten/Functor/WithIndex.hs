@@ -30,6 +30,7 @@ module Data.Ten.Functor.WithIndex
          , Functor10WithIndex(..), fmap10C
          ) where
 
+import Data.Kind (Type)
 import GHC.Generics ((:.:)(..))
 
 import Data.Ten.Entails (Entails, byEntailment)
@@ -39,7 +40,7 @@ import Data.Ten.Functor (Functor10(..))
 --
 -- This is often a GADT-like type, in that inspecting @Index10 f a@ can refine
 -- @a@ to some more concrete type, provide instances for it via 'Entails', etc.
-type family Index10 (f :: (k -> *) -> *) :: k -> *
+type family Index10 (f :: (k -> Type) -> Type) :: k -> Type
 
 type instance Index10 (g :.: f) = Index10 f
 

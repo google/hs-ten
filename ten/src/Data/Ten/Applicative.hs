@@ -75,7 +75,7 @@ instance (Generic1 f, Applicative10 (Rep1 f))
     Wrapped1 $ to1 $ liftA210 f (from1 x) (from1 y)
 
 instance Applicative10 (Ap10 a) where
-  pure10 = Ap10
+  pure10 x = Ap10 x
   liftA210 f (Ap10 x) (Ap10 y) = Ap10 $ f x y
 
 instance Monoid a => Applicative10 (K1 i a) where

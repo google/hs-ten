@@ -39,7 +39,7 @@ import Data.Proxy (Proxy(..))
 import GHC.Generics
          ( Generic1(..)
          , (:.:)(..), (:*:)(..)
-         , M1(..), Rec1(..), U1(..)
+         , K1(..), M1(..), Rec1(..), U1(..)
          )
 
 import Data.Wrapped (Wrapped1(..))
@@ -78,8 +78,12 @@ instance Applicative10 (Ap10 a) where
   pure10 = Ap10
   liftA210 f (Ap10 x) (Ap10 y) = Ap10 $ f x y
 
--- no instance Applicative10 (K1 i a): K1 is extra non-wrapped data
+instance Monoid a => Applicative10 (K1 i a) where
+  pure10 _ = K1 mempty
+  liftA210 _ (K1 x) (K1 y) = K1 (x <> y)
+
 -- no instance Applicative10 V1: V1 is uninhabited
+
 instance Applicative10 U1 where
   pure10 _ = U1
   liftA210 _ U1 U1 = U1
@@ -88,6 +92,7 @@ deriving instance Applicative10 f => Applicative10 (Rec1 f)
 deriving instance Applicative10 f => Applicative10 (M1 i c f)
 
 -- no instance (Applicative10 f, Applicative10 g) => Applicative10 (f :+: g)
+
 instance (Applicative10 f, Applicative10 g) => Applicative10 (f :*: g) where
   pure10 x = pure10 x :*: pure10 x
   liftA210 f (xl :*: xr) (yl :*: yr) = liftA210 f xl yl :*: liftA210 f xr yr

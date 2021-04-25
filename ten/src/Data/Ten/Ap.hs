@@ -48,6 +48,7 @@ import GHC.Generics (Generic)
 
 import Control.DeepSeq (NFData)
 import Data.Default.Class (Default(..))
+import Data.Hashable (Hashable(..))
 import Data.Portray (Portray(..))
 import Data.Portray.Diff (Diff)
 import Data.Wrapped (Wrapped(..))
@@ -96,7 +97,7 @@ newtype Ap10 (a :: k) (f :: k -> Type) = Ap10 { unAp10 :: f a }
 
 newtype Decoy a = Decoy ()
   deriving stock (Eq, Ord, Read, Show, Generic)
-  deriving newtype (Default, NFData)
+  deriving newtype (Default, NFData, Hashable)
   deriving (Diff, Portray) via Wrapped Generic (Decoy a)
 
 -- See [Note: Ap10 instances]
@@ -196,3 +197,15 @@ instance {-# OVERLAPS #-} NFDataAp (Decoy :: Type -> Type) where
   type NFDataCtx Decoy = NFData
 
 deriving newtype instance (NFDataCtx f a, NFDataAp f) => NFData (Ap10 a f)
+
+-- See [Note: Ap10 instances]
+class (forall a. HashableCtx f a => Hashable (f a)) => HashableAp (f :: k -> Type) where
+  type HashableCtx f :: k -> Constraint
+
+instance (forall a. Hashable a => Hashable (f a)) => HashableAp f where
+  type HashableCtx f = Hashable
+
+instance {-# OVERLAPS #-} HashableAp (Decoy :: Type -> Type) where
+  type HashableCtx Decoy = Hashable
+
+deriving newtype instance (HashableCtx f a, HashableAp f) => Hashable (Ap10 a f)

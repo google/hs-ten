@@ -38,6 +38,7 @@ import Data.Distributive (Distributive(..))
 import Data.Functor.Field (FieldRep(..))
 import Data.Functor.Update (Update)
 import Data.Functor.Rep (Representable(..), distributeRep)
+import Data.Hashable (Hashable(..))
 import Data.Portray (Portray)
 import Data.Portray.Diff (Diff)
 import Data.Ten
@@ -54,7 +55,7 @@ import Test.Framework.Providers.HUnit (testCase)
 data Pair a = Pair a a
   deriving
     ( Functor, Foldable, Traversable
-    , Eq, Ord, Read, Show, Default, NFData
+    , Eq, Ord, Read, Show, Hashable, Default, NFData
     , Generic, Generic1
     )
   deriving (Representable, Update, Applicative, Monad) via FieldRep Pair
@@ -68,7 +69,7 @@ data Foo f = Foo
   , z :: Ap10 Double f
   , w :: Pair (Ap10 Int f)
   }
-  deriving (Eq, Ord, Read, Show, Default, NFData, Generic, Generic1)
+  deriving (Eq, Ord, Read, Show, Hashable, Default, NFData, Generic, Generic1)
   deriving (Portray, Diff) via Wrapped Generic (Foo f)
   deriving
     ( Foldable10, Traversable10, Constrained10 c
@@ -83,7 +84,7 @@ data Bar f = Bar
   { ordinaryField :: Ap10 Int f
   , nestedField :: Foo f
   }
-  deriving (Eq, Ord, Read, Show, Default, NFData, Generic, Generic1)
+  deriving (Eq, Ord, Read, Show, Hashable, Default, NFData, Generic, Generic1)
   deriving (Portray, Diff) via Wrapped Generic (Bar f)
   deriving
     ( Foldable10, Traversable10, Constrained10 c

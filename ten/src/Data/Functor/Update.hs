@@ -21,10 +21,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Functor.Update
-         ( Update(..), updateRep, ixRep, GUpdate(..)
-         , equalityTable
-         ) where
+module Data.Functor.Update (Update(..), updateRep, ixRep, GUpdate(..)) where
 
 import Data.Coerce (coerce)
 import Data.Functor ((<&>))
@@ -66,16 +63,6 @@ instance (Generic1 f, GTabulate (Rep1 f), GUpdate (Rep1 f), Functor f)
    where
     setters_ :: f (FieldSetter f)
     setters_ = setters
-
--- | Implementation detail of @'Eq' ('Field' f)@.
---
--- This is a pre-populated table of 'Bool's, with 'True's in the elements where
--- the inner position is the same as the outer position, i.e. along the
--- "diagonal".  Then we can test two @forall a. f a -> a@ functions for
--- equality, by applying them in turn to the two layers of @f@, and see if we
--- reach a 'True' or a 'False'.
-equalityTable :: Update f => f (f Bool)
-equalityTable = tabulate (\i -> updateRep i True (tabulate (const False)))
 
 -- | The 'Generic1' implementation of 'Update'.
 class GUpdate rec where

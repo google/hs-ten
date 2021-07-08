@@ -14,11 +14,9 @@ rather than just a concrete type.
 
 The naming convention `Functor10` comes from the fact that it's a functor from
 the category of objects with one type parameter to the category of objects
-with zero type parameters.  See
-[http://hackage.haskell.org/package/hakaru-0.4.0/docs/src/Language.Hakaru.Syntax.IClasses.html](hakaru)
-for precedent for this naming convention.  From there, since everyone will end
-up pronouncing it "functor-ten", we pick "ten" as the package name and module
-namespace.
+with zero type parameters.  See [hakaru][1] for precedent for this naming
+convention.  From there, since everyone will end up pronouncing it
+"functor-ten", we pick "ten" as the package name and module namespace.
 
 The two categories involved are:
 
@@ -45,3 +43,5 @@ Bool)`.  This kind of usage is the main focus of the library, and has the most
 fully-formed functionality.  Other things exist, too, which might have different
 instances of `f` in each value, or even existentially-quantified instances of
 `f`.  These are available in varying states of completeness.
+
+[1]: http://hackage.haskell.org/package/hakaru-0.4.0/docs/src/Language.Hakaru.Syntax.IClasses.html

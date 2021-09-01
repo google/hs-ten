@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ea867579135d107be45af0206fda9beece593558718bbf221c77a2d90920e3f3
+-- hash: a2c081624c024743d0659939f81ef33b5ee04f9df1f6ecbafbc74223414742db
 
 name:           ten-unordered-containers
 version:        0.1.0.0
@@ -39,6 +39,7 @@ library
     , hashable >=1.0 && <1.4
     , portray >=0.1 && <0.2
     , portray-diff >=0.1 && <0.2
+    , some >=1.0 && <1.1
     , ten >=0.1 && <0.2
     , unordered-containers >=0.1 && <0.3
     , wrapped >=0.1 && <0.2
@@ -60,6 +61,7 @@ test-suite HashMap-test
     , portray-diff >=0.1 && <0.2
     , portray-diff-hunit
     , portray-pretty
+    , some >=1.0 && <1.1
     , ten >=0.1 && <0.2
     , ten-lens
     , ten-unordered-containers

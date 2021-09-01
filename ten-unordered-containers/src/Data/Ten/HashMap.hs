@@ -49,6 +49,7 @@ import GHC.Exts (IsList)
 import qualified GHC.Exts as Exts
 import GHC.Generics (Generic1, (:.:)(..))
 
+import Data.GADT.Compare (GEq(..))
 import Data.Hashable (Hashable(..))
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HM
@@ -67,7 +68,6 @@ import Data.Ten.Traversable.WithIndex (Traversable10WithIndex(..))
 import Data.Ten.Sigma ((:**)(..))
 
 type Hashable1 k = forall x. Hashable (k x)
-type Eq1 k = forall x. Eq (k x)
 type Show1 k = forall x. Show (k x)
 type Portray1 k = forall x. Portray (k x)
 type Diff1 k = forall x. Diff (k x)
@@ -85,12 +85,12 @@ newtype HashMap10 k m = HashMap10 (HashMap (Exists k) (k :** m))
     ) via HashMap (Exists k) :.: ((:**) k)
 
 deriving stock
-  instance (TestEquality k, Eq1 k, Entails k (Eq :!: m)) => Eq (HashMap10 k m)
+  instance (GEq k, Entails k (Eq :!: m)) => Eq (HashMap10 k m)
 
 deriving stock
   instance (Show1 k, Entails k (Show :!: m)) => Show (HashMap10 k m)
 
-instance (TestEquality k, Eq1 k, Hashable1 k) => IsList (HashMap10 k m) where
+instance (GEq k, Hashable1 k) => IsList (HashMap10 k m) where
   type Item (HashMap10 k m) = k :** m
   toList = toList
   fromList = fromList
@@ -112,7 +112,7 @@ diffM e = diffToM $ case e of
   InBoth x y -> diff x y
   InRight y -> Just $ "_" `diffVs` portray y
 
-instance ( TestEquality k, Eq1 k, Hashable1 k, Portray1 k, Diff1 k
+instance ( TestEquality k, GEq k, Hashable1 k, Portray1 k, Diff1 k
          , Entails k (Portray :!: m), Entails k (Diff :!: m)
          )
       => Diff (HashMap10 k m) where
@@ -137,29 +137,29 @@ empty = HashMap10 HM.empty
 -- | Insert a new pair into a 'HashMap10'
 insert
   :: forall a k m
-   . (TestEquality k, Hashable1 k, Eq1 k)
+   . (GEq k, Hashable1 k)
   => k a -> m a -> HashMap10 k m -> HashMap10 k m
 insert k m (HashMap10 h) = HashMap10 $ HM.insert (Exists k) (k :** m) h
 
 fromEntry
   :: forall a k m
-   . TestEquality k
+   . GEq k
   => k a -> k :** m -> m a
-fromEntry k (k' :** m) = case testEquality k k' of
+fromEntry k (k' :** m) = case geq k k' of
   Just Refl -> m
   Nothing -> error "Internal error: key mapped to entry of the wrong type."
 
 -- | Find an entry based on its key, if present.
 lookup
   :: forall a k m
-   . (TestEquality k, Hashable1 k, Eq1 k)
+   . (GEq k, Hashable1 k)
   => k a -> HashMap10 k m -> Maybe (m a)
 lookup k (HashMap10 h) = fromEntry k <$> HM.lookup (Exists k) h
 
 -- | Find an entry based on its key, or return the given fallback value.
 findWithDefault
   :: forall a k m
-   . (TestEquality k, Hashable1 k, Eq1 k)
+   . (GEq k, Hashable1 k)
   => m a -> k a -> HashMap10 k m -> m a
 findWithDefault m k = fromMaybe m . lookup k
 
@@ -168,5 +168,5 @@ toList :: HashMap10 k m -> [k :** m]
 toList (HashMap10 m) = F.toList m
 
 -- | Build a map from a list of 'Entry'.
-fromList :: (TestEquality k, Hashable1 k, Eq1 k) => [k :** m] -> HashMap10 k m
+fromList :: (GEq k, Hashable1 k) => [k :** m] -> HashMap10 k m
 fromList = HashMap10 . HM.fromList . map (\ e@(k :** _) -> (Exists k, e))

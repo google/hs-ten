@@ -27,6 +27,7 @@ module Data.Ten.Exists (Exists(..)) where
 import Data.Kind (Type)
 import Data.Type.Equality ((:~:)(..), TestEquality(..))
 
+import Data.GADT.Compare (GEq(..), GCompare(..), GOrdering(..))
 import Data.Hashable (Hashable(..))
 import Data.Portray (Portray(..), Portrayal(..))
 import Data.Portray.Diff (Diff(..), diffVs)
@@ -41,17 +42,16 @@ data Exists (m :: k -> Type) where
 
 deriving stock instance (forall a. Show (m a)) => Show (Exists m)
 
--- | Test type-equality, then test equality according to 'Eq'.
---
--- This is because 'testEquality' returning 'Just' might not imply ('=='): you
--- could have e.g. @data Thing a where Thing :: Int -> Thing Int@, with
--- @testEquality (Thing _) (Thing _) = Just Refl@, but @Thing x == Thing y = x
--- == y@.  This might be considered bad form, but the documentation of
--- 'TestEquality' doesn't currently rule it out.
-instance (TestEquality m, forall a. Eq (m a)) => Eq (Exists m) where
-  Exists x == Exists y = case testEquality x y of
+instance GEq m => Eq (Exists m) where
+  Exists x == Exists y = case geq x y of
     Nothing -> False
-    Just Refl -> x == y
+    Just _ -> True
+
+instance GCompare m => Ord (Exists m) where
+  compare (Exists x) (Exists y) = case gcompare x y of
+    GLT -> LT
+    GEQ -> EQ
+    GGT -> GT
 
 instance (forall a. Hashable (m a)) => Hashable (Exists m) where
   hashWithSalt s (Exists ka) = hashWithSalt s ka
@@ -59,6 +59,8 @@ instance (forall a. Hashable (m a)) => Hashable (Exists m) where
 instance (forall a. Portray (m a)) => Portray (Exists m) where
   portray (Exists x) = Apply (Atom "Exists") [portray x]
 
+-- N.B. we do actually want TestEquality rather than GEq here, because we want
+-- to diff same-typed-but-not-equal values according to their Diff instances.
 instance (TestEquality m, forall a. Portray (m a), forall a. Diff (m a))
       => Diff (Exists m) where
   diff (Exists x) (Exists y) = case testEquality x y of

@@ -28,10 +28,11 @@ module Data.Ten.Lens
          ) where
 
 import Data.Functor.Contravariant (contramap)
-import Data.Type.Equality (TestEquality(..), (:~:)(..))
+import Data.Type.Equality ((:~:)(..))
 
 import Control.Lens (Getting, Prism', Iso, iso, view)
 import Control.Lens.Setter ((%~), Setter, ASetter, setting)
+import Data.GADT.Compare (GEq(..))
 import Data.Profunctor (dimap, right')
 
 import Data.Ten.Ap (Ap10(..))
@@ -70,11 +71,11 @@ comp = iso unComp1 Comp1
 --     _Field10 k' f (k := m) === k := m | k' /= k
 --     _Field10 k # m === k := m
 _Field10
-  :: TestEquality k
+  :: GEq k
   => k a -> Prism' (k :** m) (m a)
 _Field10 k = dimap toE fromE . right'
  where
-  toE frag@(k' :** m) = case testEquality k k' of
+  toE frag@(k' :** m) = case geq k k' of
     Just Refl -> Right m
     Nothing -> Left frag
 
@@ -83,7 +84,7 @@ _Field10 k = dimap toE fromE . right'
 -- | '_Field10' taking the field lens rather than the 'Rep10'.
 _Field10'
   :: forall rec a m
-   . (TestEquality (Rep10 rec), Representable10 rec)
+   . (GEq (Rep10 rec), Representable10 rec)
   => (forall n. Getting (Ap10 a n) (rec n) (Ap10 a n))
   -> Prism' (Rep10 rec :** m) (m a)
 _Field10' l = _Field10 @(Rep10 rec) (field10 l)

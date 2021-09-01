@@ -37,10 +37,11 @@ module Data.Ten.Sigma
          ) where
 
 import Data.Functor.Contravariant (Contravariant(..))
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, isJust)
 import Data.Type.Equality ((:~:)(Refl), TestEquality(..))
 
 import Control.DeepSeq (NFData(..))
+import Data.GADT.Compare (GEq(..))
 import Data.Portray (Portray(..), Portrayal(..), infixr_)
 import Data.Portray.Diff (Diff(..), diffVs)
 
@@ -72,9 +73,9 @@ instance (forall a. NFData (k a), Entails k (NFData :!: m))
       => NFData (k :** m) where
   rnf (k :** m) = withEntailment @(NFData :!: m) k $ rnf k `seq` rnf m
 
-instance (TestEquality k, Entails k (Eq :!: m))
+instance (GEq k, Entails k (Eq :!: m))
       => Eq (k :** m) where
-  (kl :** ml) == (kr :** mr) = case testEquality kl kr of
+  (kl :** ml) == (kr :** mr) = case geq kl kr of
      Nothing -> False
      Just Refl -> withEntailment @(Eq :!: m) kl $ ml == mr
 
@@ -134,11 +135,8 @@ instance Traversable10WithIndex ((:**) k) where
   imapTraverse10 r f (k :** m) = r . (k :**) <$> f k m
 
 -- | Check if two pairs have the same key.
-eqKey :: TestEquality k => k :** m -> k :** n -> Bool
-eqKey (kl :** _) (kr :** _) =
-  case testEquality kl kr of
-    Nothing   -> False
-    Just Refl -> True
+eqKey :: GEq k => k :** m -> k :** n -> Bool
+eqKey (kl :** _) (kr :** _) = isJust (geq kl kr)
 
 -- | "Zip" a single field of a record with a (':**').
 --

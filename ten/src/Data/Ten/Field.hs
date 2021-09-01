@@ -23,6 +23,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -48,7 +49,7 @@ import Data.Functor.Const (Const(..))
 import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy(..))
 import qualified Data.Text as T
-import Data.Type.Equality (TestEquality(..))
+import Data.Type.Equality (TestEquality(..), (:~:)(..))
 import GHC.Generics
          ( Generic1(..)
          , (:*:)(..), (:.:)(..)
@@ -57,6 +58,7 @@ import GHC.Generics
          )
 import GHC.TypeLits (KnownSymbol, symbolVal)
 
+import Data.GADT.Compare (GEq(..), GCompare(..), GOrdering(..))
 import Data.Hashable (Hashable(..))
 import Data.Portray (Portray(..), Portrayal(..))
 import Data.Portray.Diff (Diff(..), diffVs)
@@ -79,6 +81,19 @@ newtype Field10 f a = Field10 { getField10 :: forall m. f m -> m a }
 instance Update10 f => TestEquality (Field10 f) where
   testEquality (Field10 f) (Field10 g) = case f equalityTable of
     EqualityTable tbl -> unComp1 (g tbl)
+
+instance Update10 f => GEq (Field10 f) where
+  geq = testEquality
+
+instance (Traversable10 f, Applicative10 f, Update10 f)
+      => GCompare (Field10 f) where
+  gcompare x y = case geq x y of
+    Just Refl -> GEQ
+    Nothing ->
+      if getConst (getField10 x fieldNumbers) <
+           getConst (getField10 y fieldNumbers)
+        then GLT
+        else GGT
 
 fieldNumbers :: (Traversable10 f, Applicative10 f) => f (Const Int)
 fieldNumbers =

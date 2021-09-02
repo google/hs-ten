@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a2c081624c024743d0659939f81ef33b5ee04f9df1f6ecbafbc74223414742db
+-- hash: bacdf6bf658e324e59d002464462008d6e6041183c60c073fc2f568c989d3873
 
 name:           ten-unordered-containers
 version:        0.1.0.0
@@ -18,6 +18,7 @@ author:         Andrew Pritchard <awpr@google.com>
 maintainer:     Andrew Pritchard <awpr@google.com>
 copyright:      2020-2021 Google LLC
 license:        Apache-2.0
+license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     CHANGELOG.md

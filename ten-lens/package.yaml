@@ -20,6 +20,7 @@ description: |
   This provides lenses and related functionality for "ten".  It's in a separate
   package to reduce the dependency weight of "ten" itself.
 license: Apache-2.0
+license-file: LICENSE
 author: Andrew Pritchard <awpr@google.com>
 copyright: 2018-2021 Google LLC
 maintainer: Andrew Pritchard <awpr@google.com>

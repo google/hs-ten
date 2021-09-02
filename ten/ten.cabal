@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d60d6f65b4a08d9f4d96b2d061404e0a151b21667e461c3cf1dfc9ec60181ee5
+-- hash: 420a8fd5dab8b49f35524f82502e9d7f80fabffd59b9a3c7d9cfbf5999c83618
 
 name:           ten
 version:        0.1.0.0
@@ -29,6 +29,7 @@ author:         Andrew Pritchard <awpr@google.com>, Reiner Pope <reinerp@google.
 maintainer:     Andrew Pritchard <awpr@google.com>
 copyright:      2018-2021 Google LLC
 license:        Apache-2.0
+license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     CHANGELOG.md

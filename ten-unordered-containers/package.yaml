@@ -20,6 +20,7 @@ description: |
   This provides unordered (hash-based) containers of kind `(k -> Type) -> Type`
   based on unordered-containers.  Currently only HashMap10 is implemented.
 license: Apache-2.0
+license-file: LICENSE
 author: Andrew Pritchard <awpr@google.com>
 copyright: 2020-2021 Google LLC
 maintainer: Andrew Pritchard <awpr@google.com>

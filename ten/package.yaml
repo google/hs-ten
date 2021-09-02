@@ -30,6 +30,7 @@ description: |
   class 'Constrained10' provides instances for the argument of each occurrence
   of the type parameter in a value.
 license: Apache-2.0
+license-file: LICENSE
 author: >
   Andrew Pritchard <awpr@google.com>,
   Reiner Pope <reinerp@google.com>

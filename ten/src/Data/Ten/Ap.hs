@@ -85,11 +85,11 @@ newtype Ap10 (a :: k) (f :: k -> Type) = Ap10 { unAp10 :: f a }
 -- Finally, because @Ap10@ is poly-kinded, if we used @Eq@ directly as the
 -- context of that quantified constraint, we'd be saying that @Ap10@ can only
 -- be @Eq@ when its hidden kind parameter is @Type@.  Instead, we generalize it
--- to an associated type family 'EqCtx'.  This might be e.g. 'KnownNat' for
--- 'Nat's, or simply nothing for phantom type parameters.  I'm not yet sure how
--- to approach the instances for other kinds -- for instance, should we provide
--- stock ones, or expect users to write kind-level newtypes and provide their
--- own instances?
+-- to an associated type family 'EqCtx'.  This might be e.g.
+-- 'GHC.TypeNats.KnownNat' for 'GHC.TypeNats.Nat's, or simply nothing for
+-- phantom type parameters.  I'm not yet sure how to approach the instances for
+-- other kinds -- for instance, should we provide stock ones, or expect users
+-- to write kind-level newtypes and provide their own instances?
 --
 -- This trickery is applied to all the instances of Ap10.  In particular this
 -- means @deriving (Eq, Ord, Read, Show, Default, NFData)@ and

@@ -34,9 +34,12 @@
 -- | A hash map linking keys' and values' type parameters existentially.
 
 module Data.Ten.HashMap
-         ( HashMap10, (:**)(..)
+         ( -- * HashMap10
+           HashMap10, (:**)(..)
          , empty, insert, lookup, findWithDefault
          , toList, fromList
+           -- * Miscellaneous
+         , Hashable1, Show1, Portray1, Diff1
          ) where
 
 import Prelude hiding (lookup)
@@ -167,6 +170,6 @@ findWithDefault m k = fromMaybe m . lookup k
 toList :: HashMap10 k m -> [k :** m]
 toList (HashMap10 m) = F.toList m
 
--- | Build a map from a list of 'Entry'.
+-- | Build a map from a list of (k ':**' m) entries.
 fromList :: (GEq k, Hashable1 k) => [k :** m] -> HashMap10 k m
 fromList = HashMap10 . HM.fromList . map (\ e@(k :** _) -> (Exists k, e))

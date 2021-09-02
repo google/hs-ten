@@ -65,7 +65,7 @@ ap10 = iso unAp10 Ap10
 comp :: Iso ((m :.: n) a) ((k :.: l) b) (m (n a)) (k (l b))
 comp = iso unComp1 Comp1
 
--- | A 'Prism' from a ':**" to a particular field.
+-- | A 'Control.Lens.Prism' from a ':**" to a particular field.
 --
 --     _Field10 k f (k := m) === (k :=) <$> f m
 --     _Field10 k' f (k := m) === k := m | k' /= k
@@ -90,11 +90,11 @@ _Field10'
 _Field10' l = _Field10 @(Rep10 rec) (field10 l)
 
 infixr 5 !=
--- | Shortcut to construct a (':**') from a 'Getter'.
+-- | Shortcut to construct a (':**') from a 'Control.Lens.Getter'.
 --
 -- Note that this assumes the fields are ultimately wrapped in 'Ap10'.  If a
 -- particular field doesn't have 'Ap10' (which can only arise from a
--- manually-written 'Record10' instance), just pretend it does by adding
+-- manually-written 'Representable10' instance), just pretend it does by adding
 -- @from ap10@ to the lens.
 (!=)
   :: Representable10 rec

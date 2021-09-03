@@ -45,7 +45,7 @@ extra-source-files:
 dependencies:
   - adjunctions >= 4.0 && < 4.5
   - distributive >= 0.1 && < 0.7
-  - base >= 4.12 && < 4.16
+  - base >= 4.14 && < 4.16
   - data-default-class >= 0.0 && < 0.2
   - deepseq >= 1.1 && < 1.5
   - hashable >= 1.0 && < 1.4

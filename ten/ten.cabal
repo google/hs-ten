@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 420a8fd5dab8b49f35524f82502e9d7f80fabffd59b9a3c7d9cfbf5999c83618
+-- hash: 7bf5f754a83fbf8081fa2c24db7b403f290a8408baded9d25098c8490bf4ba59
 
 name:           ten
 version:        0.1.0.0
@@ -65,7 +65,7 @@ library
       src
   build-depends:
       adjunctions >=4.0 && <4.5
-    , base >=4.12 && <4.16
+    , base >=4.14 && <4.16
     , data-default-class >=0.0 && <0.2
     , deepseq >=1.1 && <1.5
     , distributive >=0.1 && <0.7
@@ -88,7 +88,7 @@ test-suite Traversable10-test
   build-depends:
       HUnit
     , adjunctions >=4.0 && <4.5
-    , base >=4.12 && <4.16
+    , base >=4.14 && <4.16
     , data-default-class >=0.0 && <0.2
     , deepseq >=1.1 && <1.5
     , distributive >=0.1 && <0.7

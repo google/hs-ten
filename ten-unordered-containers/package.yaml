@@ -17,10 +17,11 @@ version: 0.1.0.0
 category: Data
 synopsis: A package providing one unordered container.
 description: |
-  This provides unordered (hash-based) containers of kind `(k -> Type) -> Type`
-  based on unordered-containers.  Currently only HashMap10 is implemented.
+  This provides unordered (hash-based) containers of kind @(k -> Type) -> Type@
+  based on
+  <https://hackage.haskell.org/package/unordered-containers unordered-containers>.
+  Currently only @HashMap10@ is implemented.
 license: Apache-2.0
-license-file: LICENSE
 author: Andrew Pritchard <awpr@google.com>
 copyright: 2020-2021 Google LLC
 maintainer: Andrew Pritchard <awpr@google.com>

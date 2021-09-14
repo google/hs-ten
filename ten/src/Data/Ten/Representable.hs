@@ -104,16 +104,16 @@ field10'
 field10' f = rep10' (unAp10 . f)
 
 -- | Superclass appeasement; deriving via this will give infinite loops; don't!
-deriving via (f :: (k -> Type) -> Type)
-  instance Functor10 f => Functor10 (Wrapped1 Representable10 f)
+instance Functor10 f => Functor10 (Wrapped1 Representable10 f) where
+  fmap10 f (Wrapped1 fm) = Wrapped1 (fmap10 f fm)
 
 -- | Superclass appeasement; deriving via this will give infinite loops; don't!
-deriving via (f :: (k -> Type) -> Type)
-  instance Foldable10 f => Foldable10 (Wrapped1 Representable10 f)
+instance Foldable10 f => Foldable10 (Wrapped1 Representable10 f) where
+  foldMap10 f (Wrapped1 fm) = foldMap10 f fm
 
 -- | Superclass appeasement; deriving via this will give infinite loops; don't!
-deriving via (f :: (k -> Type) -> Type)
-  instance Traversable10 f => Traversable10 (Wrapped1 Representable10 f)
+instance Traversable10 f => Traversable10 (Wrapped1 Representable10 f) where
+  mapTraverse10 r f (Wrapped1 fm) = mapTraverse10 (r . Wrapped1) f fm
 
 type instance Index10 (Wrapped1 Representable10 f) = Rep10 f
 

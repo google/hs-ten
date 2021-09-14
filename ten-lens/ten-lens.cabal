@@ -4,13 +4,14 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: abb4a3ce58f09564320c185c7d0e7c680c6ed4ba1ea95380a8ee30999e0205ce
+-- hash: e024de824701cfc2afafebd3ef1061a0d8bc6af609120cac9bb2db8e3b0d8ce2
 
 name:           ten-lens
-version:        0.1.0.0
-synopsis:       Lenses for the types in the "ten" package.
-description:    This provides lenses and related functionality for "ten".  It's in a separate
-                package to reduce the dependency weight of "ten" itself.
+version:        0.1.0.1
+synopsis:       Lenses for the types in the ten package.
+description:    This provides lenses and related functionality for
+                <https://hackage.haskell.org/package/ten ten>.  It's in a separate package to
+                reduce the dependency weight of @ten@ itself.
 category:       Data
 homepage:       https://github.com/google/hs-ten#readme
 bug-reports:    https://github.com/google/hs-ten/issues
@@ -36,7 +37,7 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.14 && <4.16
+      base >=4.12 && <4.16
     , lens >=1.5 && <5.1
     , profunctors >=0.1 && <5.7
     , some >=1.0 && <1.1

@@ -13,12 +13,13 @@
 # limitations under the License.
 
 name: ten-lens
-version: 0.1.0.0
+version: 0.1.0.1
 category: Data
-synopsis: Lenses for the types in the "ten" package.
+synopsis: Lenses for the types in the ten package.
 description: |
-  This provides lenses and related functionality for @ten@.  It's in a separate
-  package to reduce the dependency weight of @ten@ itself.
+  This provides lenses and related functionality for
+  <https://hackage.haskell.org/package/ten ten>.  It's in a separate package to
+  reduce the dependency weight of @ten@ itself.
 license: Apache-2.0
 author: Andrew Pritchard <awpr@google.com>
 copyright: 2018-2021 Google LLC
@@ -30,7 +31,7 @@ extra-source-files:
   CHANGELOG.md
 
 dependencies:
-  - base >= 4.14 && < 4.16
+  - base >= 4.12 && < 4.16
   - lens >= 1.5 && < 5.1
   - profunctors >= 0.1 && < 5.7
   - some >= 1.0 && < 1.1

@@ -20,7 +20,7 @@ packages:
 - ten-unordered-containers
 
 extra-deps:
-- portray-0.1.0.0
+- portray-0.1.1
 - portray-diff-0.1.0.0
 - portray-diff-hunit-0.1.0.0
 - portray-pretty-0.1.0.0

@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 460b0d405128cac6332d195fe97b6929e0a80b1dfef27a869163931cb8b21e7c
+-- hash: d03c56a37f35170e077e000599e38ae3b5326929a14acca36d873bd5afa407db
 
 name:           ten-unordered-containers
-version:        0.1.0.1
+version:        0.1.0.2
 synopsis:       A package providing one unordered container.
 description:    This provides unordered (hash-based) containers of kind @(k -> Type) -> Type@
                 based on
@@ -40,7 +40,7 @@ library
   build-depends:
       base >=4.12 && <4.16
     , hashable >=1.0 && <1.4
-    , portray >=0.1 && <0.2
+    , portray >=0.1.1 && <0.3
     , portray-diff >=0.1 && <0.2
     , some >=1.0 && <1.1
     , ten >=0.1 && <0.2
@@ -60,7 +60,7 @@ test-suite HashMap-test
     , base >=4.12 && <4.16
     , hashable >=1.0 && <1.4
     , lens
-    , portray >=0.1 && <0.2
+    , portray >=0.1.1 && <0.3
     , portray-diff >=0.1 && <0.2
     , portray-diff-hunit
     , portray-pretty

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: ten
-version: 0.1.0.1
+version: 0.1.0.2
 category: Data
 synopsis: Typeclasses like Functor, etc. over arity-1 type constructors.
 description: |
@@ -48,7 +48,7 @@ dependencies:
   - data-default-class >= 0.0 && < 0.2
   - deepseq >= 1.1 && < 1.5
   - hashable >= 1.0 && < 1.4
-  - portray >= 0.1 && < 0.2
+  - portray >= 0.1.1 && < 0.3
   - portray-diff >= 0.1 && < 0.2
   - some >= 1.0 && < 1.1
   - text >= 0.1 && < 1.3

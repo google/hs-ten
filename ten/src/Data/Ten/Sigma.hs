@@ -118,7 +118,7 @@ instance ( TestEquality k, forall a. Portray (k a), forall a. Diff (k a)
         (dk, dm) ->
           Just $ Binop ":**" (infixr_ 5)
             (fromMaybe (portray ka) dk)
-            (fromMaybe "_" dm)
+            (fromMaybe (Opaque "_") dm)
     Nothing   -> Just $
       withEntailment @(Portray :!: m) ka (portray (ka :** ma)) `diffVs`
       withEntailment @(Portray :!: m) kb (portray (kb :** mb))

@@ -20,6 +20,7 @@
 
 module Data.Ten.Internal where
 
+import Data.String (fromString)
 import Data.Text (Text)
 import qualified Data.Text as T
 import GHC.Generics ((:*:)(..))
@@ -58,14 +59,15 @@ showsPath p path = case reverse path of
 
 -- | Pretty-print a 'PathComponent'.
 portrayPathComponent :: PathComponent -> Portrayal
-portrayPathComponent NewtypeIso = "coerce"
-portrayPathComponent (NamedField selectorName _) = Atom selectorName
+portrayPathComponent NewtypeIso = Name "coerce"
+portrayPathComponent (NamedField selectorName _) =
+  Name (fromString (T.unpack selectorName))
 
 -- | Pretty-print a field path.
 portrayPath :: [PathComponent] -> Portrayal
 portrayPath path = go $ reverse path
  where
-  go [] = "coerce"
+  go [] = Name "coerce"
   go [x] = portrayPathComponent x
   go (x:xs) =
     Binop "." (infixr_ 9) (portrayPathComponent x) $

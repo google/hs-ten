@@ -100,7 +100,7 @@ instance (GEq k, Hashable1 k) => IsList (HashMap10 k m) where
 
 instance (Portray1 k, Entails k (Portray :!: m))
       => Portray (HashMap10 k m) where
-  portray = Apply "fromList" . pure . portray . toList
+  portray = Apply (Name "fromList") . pure . portray . toList
 
 data EntryDiff a = InLeft a | InBoth a a | InRight a
 
@@ -111,9 +111,9 @@ diffToM = \case
 
 diffM :: (Diff a, Portray a) => EntryDiff a -> ((Any, All), Maybe Portrayal)
 diffM e = diffToM $ case e of
-  InLeft x -> Just $ portray x `diffVs` "_"
+  InLeft x -> Just $ portray x `diffVs` Opaque "_"
   InBoth x y -> diff x y
-  InRight y -> Just $ "_" `diffVs` portray y
+  InRight y -> Just $ Opaque "_" `diffVs` portray y
 
 instance ( TestEquality k, GEq k, Hashable1 k, Portray1 k, Diff1 k
          , Entails k (Portray :!: m), Entails k (Diff :!: m)
@@ -122,8 +122,8 @@ instance ( TestEquality k, GEq k, Hashable1 k, Portray1 k, Diff1 k
   diff (HashMap10 l) (HashMap10 r) =
     if anyDiff
       then
-        Just $ Apply "fromList" $ pure $ List $
-        (if allDiff then id else (++ ["..."])) $
+        Just $ Apply (Name "fromList") $ pure $ List $
+        (if allDiff then id else (++ [Opaque "..."])) $
         catMaybes $ F.toList diffs
       else Nothing
    where

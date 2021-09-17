@@ -114,7 +114,8 @@ instance FieldPaths10 f => Show (Field10 f a) where
     showString "Field10 " . showsPath 11 (coerce $ f fieldPaths10)
 
 instance FieldPaths10 f => Portray (Field10 f a) where
-  portray (Field10 f) = Apply "Field10" [portrayPath $ coerce $ f fieldPaths10]
+  portray (Field10 f) =
+    Apply (Name "Field10") [portrayPath $ coerce $ f fieldPaths10]
 
 instance (Traversable10 f, Applicative10 f, FieldPaths10 f)
       => Diff (Field10 f a) where

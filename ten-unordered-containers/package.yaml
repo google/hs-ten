@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: ten-unordered-containers
-version: 0.1.0.1
+version: 0.1.0.2
 category: Data
 synopsis: A package providing one unordered container.
 description: |
@@ -34,7 +34,7 @@ extra-source-files:
 dependencies:
   - base >= 4.12 && < 4.16
   - hashable >= 1.0 && < 1.4
-  - portray >= 0.1 && < 0.2
+  - portray >= 0.1.1 && < 0.3
   - portray-diff >= 0.1 && < 0.2
   - some >= 1.0 && < 1.1
   - ten >= 0.1 && < 0.2

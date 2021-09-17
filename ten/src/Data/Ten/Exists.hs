@@ -57,7 +57,7 @@ instance (forall a. Hashable (m a)) => Hashable (Exists m) where
   hashWithSalt s (Exists ka) = hashWithSalt s ka
 
 instance (forall a. Portray (m a)) => Portray (Exists m) where
-  portray (Exists x) = Apply (Atom "Exists") [portray x]
+  portray (Exists x) = Apply (Name "Exists") [portray x]
 
 -- N.B. we do actually want TestEquality rather than GEq here, because we want
 -- to diff same-typed-but-not-equal values according to their Diff instances.

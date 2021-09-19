@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d03c56a37f35170e077e000599e38ae3b5326929a14acca36d873bd5afa407db
+-- hash: 4d318eaded5393e69ee82bfb0529b9e4a8ae506218e1ad9a0d004a9d71c9ff05
 
 name:           ten-unordered-containers
 version:        0.1.0.2
@@ -41,11 +41,11 @@ library
       base >=4.12 && <4.16
     , hashable >=1.0 && <1.4
     , portray >=0.1.1 && <0.3
-    , portray-diff >=0.1 && <0.2
-    , some >=1.0 && <1.1
-    , ten >=0.1 && <0.2
+    , portray-diff ==0.1.*
+    , some ==1.0.*
+    , ten ==0.1.*
     , unordered-containers >=0.1 && <0.3
-    , wrapped >=0.1 && <0.2
+    , wrapped ==0.1.*
   default-language: Haskell2010
 
 test-suite HashMap-test
@@ -61,11 +61,11 @@ test-suite HashMap-test
     , hashable >=1.0 && <1.4
     , lens
     , portray >=0.1.1 && <0.3
-    , portray-diff >=0.1 && <0.2
+    , portray-diff ==0.1.*
     , portray-diff-hunit
     , portray-pretty
-    , some >=1.0 && <1.1
-    , ten >=0.1 && <0.2
+    , some ==1.0.*
+    , ten ==0.1.*
     , ten-lens
     , ten-unordered-containers
     , test-framework
@@ -73,5 +73,5 @@ test-suite HashMap-test
     , text
     , transformers
     , unordered-containers >=0.1 && <0.3
-    , wrapped >=0.1 && <0.2
+    , wrapped ==0.1.*
   default-language: Haskell2010

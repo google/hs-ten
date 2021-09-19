@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resolver: lts-17.9
+resolver: lts-18.10
 
 packages:
 - ten

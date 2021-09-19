@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: beeb8423e26fd98d4c8e77baf753deb73684d9c601cf610c1821327016e2d365
+-- hash: a4abff172206c4c7feb5d5cdecded48f279f8a8e20a682a801436de508587c31
 
 name:           ten
 version:        0.1.0.2
@@ -59,8 +59,6 @@ library
       Data.Ten.Traversable
       Data.Ten.Traversable.WithIndex
       Data.Ten.Update
-  other-modules:
-      Paths_ten
   hs-source-dirs:
       src
   build-depends:
@@ -81,8 +79,6 @@ library
 test-suite Traversable10-test
   type: exitcode-stdio-1.0
   main-is: Traversable10Test.hs
-  other-modules:
-      Paths_ten
   hs-source-dirs:
       test
   build-depends:

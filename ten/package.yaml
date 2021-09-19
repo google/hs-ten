@@ -77,6 +77,10 @@ library:
     - Data.Ten.Traversable.WithIndex
     - Data.Ten.Update
 
+  when:
+    condition: false
+    other-modules: Paths_ten
+
 tests:
   Traversable10-test:
     main: Traversable10Test.hs
@@ -86,3 +90,7 @@ tests:
       - ten
       - test-framework
       - test-framework-hunit
+
+    when:
+      condition: false
+      other-modules: Paths_ten

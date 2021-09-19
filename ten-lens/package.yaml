@@ -41,3 +41,7 @@ library:
   source-dirs: src
   exposed-modules:
     - Data.Ten.Lens
+
+  when:
+    condition: false
+    other-modules: Paths_ten_lens

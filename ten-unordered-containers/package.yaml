@@ -46,6 +46,10 @@ library:
   exposed-modules:
     - Data.Ten.HashMap
 
+  when:
+    condition: false
+    other-modules: Paths_ten_unordered_containers
+
 tests:
   HashMap-test:
     source-dirs: test
@@ -61,3 +65,7 @@ tests:
       - text
       - transformers
       - HUnit
+
+    when:
+      condition: false
+      other-modules: Paths_ten_unordered_containers

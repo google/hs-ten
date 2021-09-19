@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4d318eaded5393e69ee82bfb0529b9e4a8ae506218e1ad9a0d004a9d71c9ff05
+-- hash: 3ec9d269cc142c91d3b7dcad78705acf025ca0a8f3b3b7a4ae688beec90124e5
 
 name:           ten-unordered-containers
 version:        0.1.0.2
@@ -33,8 +33,6 @@ source-repository head
 library
   exposed-modules:
       Data.Ten.HashMap
-  other-modules:
-      Paths_ten_unordered_containers
   hs-source-dirs:
       src
   build-depends:
@@ -51,8 +49,6 @@ library
 test-suite HashMap-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
-  other-modules:
-      Paths_ten_unordered_containers
   hs-source-dirs:
       test
   build-depends:

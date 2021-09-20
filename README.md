@@ -2,9 +2,23 @@
 
 A mirrored typeclass hierarchy of `Functor` etc. for `(k -> Type) -> Type`.
 
+[![Stack CI](https://github.com/google/hs-ten/actions/workflows/stack-ci.yml/badge.svg)](https://github.com/google/hs-ten/actions/workflows/stack-ci.yml)
+
 ## Disclaimer
 
 This is not an officially supported Google product.
+
+## Hackage Status
+
+* [![ten](https://badgen.net/runkit/awpr/hackage/v/ten?icon=haskell&cache=600)](https://hackage.haskell.org/package/ten)
+  ![Uploaded](https://badgen.net/runkit/awpr/hackage/t/ten?cache=600)
+  ![Haddock](https://badgen.net/runkit/awpr/hackage/d/ten?cache=600)
+* [![ten-lens](https://badgen.net/runkit/awpr/hackage/v/ten-lens?icon=haskell&cache=600)](https://hackage.haskell.org/package/ten-lens)
+  ![Uploaded](https://badgen.net/runkit/awpr/hackage/t/ten-lens?cache=600)
+  ![Haddock](https://badgen.net/runkit/awpr/hackage/d/ten-lens?cache=600)
+* [![ten-unordered-containers](https://badgen.net/runkit/awpr/hackage/v/ten-unordered-containers?icon=haskell&cache=600)](https://hackage.haskell.org/package/ten-unordered-containers)
+  ![Uploaded](https://badgen.net/runkit/awpr/hackage/t/ten-unordered-containers?cache=600)
+  ![Haddock](https://badgen.net/runkit/awpr/hackage/d/ten-unordered-containers?cache=600)
 
 ## Overview
 

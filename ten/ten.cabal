@@ -3,12 +3,10 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: a4abff172206c4c7feb5d5cdecded48f279f8a8e20a682a801436de508587c31
 
 name:           ten
 version:        0.1.0.2
-synopsis:       Typeclasses like Functor, etc. over arity-1 type constructors.
+synopsis:       Functors et al. over arity-1 type constructors
 description:    This provides a mirror of the traditional typeclass hierarchy for types of
                 kind @(k -> Type) -> Type@, or functors from the category __Hask{k}__ to
                 __Hask__, where __Hask{k}__ denotes the category whose objects are mappings

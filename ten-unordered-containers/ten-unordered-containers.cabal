@@ -3,12 +3,10 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 3ec9d269cc142c91d3b7dcad78705acf025ca0a8f3b3b7a4ae688beec90124e5
 
 name:           ten-unordered-containers
 version:        0.1.0.2
-synopsis:       A package providing one unordered container.
+synopsis:       Higher-kinded hash containers
 description:    This provides unordered (hash-based) containers of kind @(k -> Type) -> Type@
                 based on
                 <https://hackage.haskell.org/package/unordered-containers unordered-containers>.

@@ -33,7 +33,7 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.12 && <4.16
+      base >=4.12 && <4.17
     , lens >=1.5 && <5.1
     , profunctors >=0.1 && <5.7
     , some ==1.0.*

@@ -13,6 +13,7 @@
 -- limitations under the License.
 
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
@@ -101,17 +102,25 @@ main = defaultMain
 
   , testCase "portray non-empty" $
       showPortrayal (HM.fromList [dynProxy @Int, dynProxy @(Int -> Int)]) @?=
-        "fromList\n\
+        "fromList\n\\
         \  [ typeRep @Int :** Proxy, typeRep @(Int -> Int) :** Proxy ]"
 
   , testCase "portray Identity" $
       showPortrayal exampleMap @?=
-        "fromList\n\
-        \  [ Field10 _erInt :** Identity 2\
-          \, Field10 _erBool :** Identity True\n\
-        \  , Field10 (_irText . _erNest) :** Identity \"aoeu\"\n\
+-- Text hashing changed, which changed the order seen by toList.
+#if MIN_VERSION_hashable(1, 3, 4)
+        "fromList\n\\
+        \  [ Field10 (_irText . _erNest) :** Identity \"aoeu\"\n\\
+        \  , Field10 _erBool :** Identity True\\
+          \, Field10 _erInt :** Identity 2\n\\
         \  ]"
-
+#else
+        "fromList\n\\
+        \  [ Field10 _erInt :** Identity 2\\
+          \, Field10 _erBool :** Identity True\n\\
+        \  , Field10 (_irText . _erNest) :** Identity \"aoeu\"\n\\
+        \  ]"
+#endif
   , testCase "length10" $
       getSum @Int
         (foldMap10 (const (Sum 1)) (HM.fromList @TypeRep @Proxy [])) @?= 0
@@ -126,7 +135,12 @@ main = defaultMain
           , erBool != [True, True]
           , erNest.irText != ["aoeu", "aoeu"]
           ]
+-- Text hashing changed, which changed the traversal order.
+#if MIN_VERSION_hashable(1, 3, 4)
+      , ["\"aoeu\"", "True", "2"]
+#else
       , ["2", "True", "\"aoeu\""]
+#endif
       )
 
   , testCase "toHashMap" $

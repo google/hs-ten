@@ -15,6 +15,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
@@ -129,9 +130,10 @@ instance ( TestEquality k, GEq k, Hashable1 k, Portray1 k, Diff1 k
    where
     ((Any anyDiff, All allDiff), diffs) =
       traverse diffM $
-      HM.unionWith (\ (InLeft x) (InRight y) -> InBoth x y)
-        (InLeft <$> l)
-        (InRight <$> r)
+      HM.unionWith combine (InLeft <$> l) (InRight <$> r)
+
+    combine (InLeft x) (InRight y) = InBoth x y
+    combine _ _ = error "Impossible"
 
 -- | An empty 'HashMap10'.
 empty :: HashMap10 k m

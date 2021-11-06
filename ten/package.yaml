@@ -13,7 +13,7 @@
 # limitations under the License.
 
 name: ten
-version: 0.1.0.2
+version: 0.2.0
 category: Data
 synopsis: Functors et al. over arity-1 type constructors
 description: |

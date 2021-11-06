@@ -208,4 +208,6 @@ instance (forall a. Hashable a => Hashable (f a)) => HashableAp f where
 instance {-# OVERLAPS #-} HashableAp (Decoy :: Type -> Type) where
   type HashableCtx Decoy = Hashable
 
-deriving newtype instance (HashableCtx f a, HashableAp f) => Hashable (Ap10 a f)
+deriving newtype
+  instance (HashableCtx f a, HashableAp f, EqCtx f a, EqAp f)
+        => Hashable (Ap10 a f)

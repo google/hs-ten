@@ -12,8 +12,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- | A 'Functor10' made by applying the argument to an existential type.
-
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -21,6 +19,8 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
+
+-- | A 'Functor10' made by applying the argument to an existential type.
 
 module Data.Ten.Exists (Exists(..)) where
 
@@ -53,7 +53,7 @@ instance GCompare m => Ord (Exists m) where
     GEQ -> EQ
     GGT -> GT
 
-instance (forall a. Hashable (m a)) => Hashable (Exists m) where
+instance (forall a. Hashable (m a), GEq m) => Hashable (Exists m) where
   hashWithSalt s (Exists ka) = hashWithSalt s ka
 
 instance (forall a. Portray (m a)) => Portray (Exists m) where

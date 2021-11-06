@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           ten
-version:        0.1.0.2
+version:        0.2.0
 synopsis:       Functors et al. over arity-1 type constructors
 description:    This provides a mirror of the traditional typeclass hierarchy for types of
                 kind @(k -> Type) -> Type@, or functors from the category __Hask{k}__ to

@@ -37,9 +37,10 @@ copyright: 2018-2021 Google LLC
 maintainer: Andrew Pritchard <awpr@google.com>
 github: google/hs-ten/ten
 
-# Note: this causes CHANGELOG.md to be included in Hackage distributions.
+# Note: this causes the extra files to be included in Hackage distributions.
 extra-source-files:
-  CHANGELOG.md
+  - CHANGELOG.md
+  - README.md
 
 dependencies:
   - adjunctions >= 4.0 && < 4.5
